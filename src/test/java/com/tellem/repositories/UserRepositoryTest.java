@@ -1,6 +1,6 @@
 package com.tellem.repositories;
 
-import com.tellem.models.User;
+import com.tellem.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

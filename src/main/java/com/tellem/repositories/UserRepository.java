@@ -1,6 +1,6 @@
 package com.tellem.repositories;
 
-import com.tellem.models.User;
+import com.tellem.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {
