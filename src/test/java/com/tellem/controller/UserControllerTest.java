@@ -1,7 +1,7 @@
 package com.tellem.controller;
 
 import com.tellem.model.User;
-import com.tellem.repositories.UserRepository;
+import com.tellem.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

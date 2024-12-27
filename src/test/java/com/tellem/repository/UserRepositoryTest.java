@@ -1,4 +1,4 @@
-package com.tellem.repositories;
+package com.tellem.repository;
 
 import com.tellem.model.User;
 import org.junit.jupiter.api.Test;
