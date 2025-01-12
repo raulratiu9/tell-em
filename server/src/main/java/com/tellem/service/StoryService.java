@@ -1,7 +1,6 @@
 package com.tellem.service;
 
 import com.tellem.model.Story;
-import com.tellem.model.User;
 import com.tellem.repository.StoryRepository;
 import org.springframework.stereotype.Service;
 

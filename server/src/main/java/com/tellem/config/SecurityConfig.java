@@ -52,14 +52,14 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
-    @Order(2)
-    @Bean
-    public SecurityFilterChain appSecurity(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request -> request.anyRequest().authenticated())
-                .oauth2Login(oauth2 -> oauth2.defaultSuccessUrl("/", true));
-
-        return httpSecurity.build();
-    }
+//    @Order(2)
+//    @Bean
+//    public SecurityFilterChain appSecurity(HttpSecurity httpSecurity) throws Exception {
+//        httpSecurity.authorizeHttpRequests(request -> request.anyRequest().authenticated())
+//                .oauth2Login(oauth2 -> oauth2.defaultSuccessUrl("/", true));
+//
+//        return httpSecurity.build();
+//    }
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -75,7 +75,7 @@ public class SecurityConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        var registeredClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("950669092745-651cgg9ahubda9ic354mv69lusfqcnaj.apps.googleusercontent.com").clientSecret("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").scope(OidcScopes.OPENID).scope(OidcScopes.PROFILE).redirectUri("https://c942-2a02-2f07-df12-ad00-1c64-38bd-29eb-a9c2.ngrok-free.app/login/ouath2/code/google")
+        var registeredClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("").clientSecret("").scope(OidcScopes.OPENID).scope(OidcScopes.PROFILE).redirectUri("")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
