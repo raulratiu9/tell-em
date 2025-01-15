@@ -14,7 +14,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true,
+        "CFBundleLocalizations": ["fr"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +32,14 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "publishableKey": "pk_test_51IpqXiB0DBWINfoejTnkhdl4zlyDSzKXkHTsext3xemBzZJZ8ZHI2xhwCeUV0GEyFcYKhwC1dR1wDg61CeUpyQ1S00XTZSdZeZ",
+          "merchantIdentifier": "merchant.com.fullstackstripeapp"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
