@@ -14,18 +14,16 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import Toast from "react-native-toast-message";
+import toastConfig from "@/utils/toastConfig";
+import { StripeProvider } from "@stripe/stripe-react-native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "(tabs)",
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -36,9 +34,9 @@ export default function RootLayout() {
     ...FontAwesome.font,
     ...FontAwesome5.font,
     ...Feather.font,
+    ...MaterialIcons.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -61,10 +59,14 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-      <Toast />
+      <StripeProvider
+        publishableKey={`${process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}`}
+      >
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+        <Toast config={toastConfig} />
+      </StripeProvider>
     </ThemeProvider>
   );
 }

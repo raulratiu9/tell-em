@@ -1,24 +1,28 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   TextInput,
   Button,
   StyleSheet,
   Text,
-  Image,
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
-import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import StoryCard from "@/components/StoryCard";
+import Toast from "react-native-toast-message";
+import { Story } from "@/types";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { router } from "expo-router";
+import postStory from "@/api/postStory";
 
 export default function AddStory() {
-  const [title, setTitle] = useState("");
-  const [image, setImage] = useState<null | ImagePicker.ImagePickerAsset>(null);
-  const [content, setContent] = useState("");
-  const [responseMessage, setResponseMessage] = useState("");
+  const [story, setStory] = useState({
+    title: "",
+    content: "",
+    image: null as null | ImagePicker.ImagePickerAsset,
+  });
+  const { title, content, image } = story;
 
   const handleImagePick = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -29,19 +33,25 @@ export default function AddStory() {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0]);
+      setStory({ ...story, image: result.assets[0] });
     }
   };
 
   const handleSubmit = async () => {
-    if (!title || !content) {
-      setResponseMessage("Title and content are required.");
+    if (!story) {
+      Toast.show({
+        type: "error",
+        text1: "You need to fill in all the fields before creating a story",
+      });
       return;
     }
 
     const formData = new FormData();
+
+    const authorId = "1"; //TODO: Remove hardcoded value after implementing OAuth2 properly
     formData.append("title", title);
     formData.append("content", content);
+    formData.append("author_id", authorId);
 
     if (image) {
       const uri = image.uri;
@@ -50,7 +60,11 @@ export default function AddStory() {
       const imageBlob = await fetch(uri)
         .then((res) => res.blob())
         .catch((error) => {
-          console.error("Error fetching image blob:", error);
+          Toast.show({
+            type: "error",
+            text1: "Failed to upload the image",
+            text2: error.message,
+          });
         });
 
       if (imageBlob && uri) {
@@ -63,36 +77,38 @@ export default function AddStory() {
           },
           fileName
         );
+        Toast.show({
+          type: "success",
+          text1: "Image has been uploaded",
+        });
       } else {
-        console.log("Image blob is not valid");
+        Toast.show({
+          type: "error",
+          text1: "Image is not valid",
+        });
       }
     }
 
-    formData.append("author_id", 2);
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
-    console.log(formData);
     try {
-      const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_BASE_API_URL}api/stories`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${process.env.EXPO_PUBLIC_AUTH_TOKEN}`,
-          },
-        }
-      );
+      const response = await postStory(formData);
 
-      setResponseMessage("Story added successfully!");
-      setTitle("");
-      setContent("");
-      setImage(null);
-      console.log(response);
+      router.push(`/story/${response.data}`);
+
+      Toast.show({
+        type: "success",
+        text1: "Tell'em you're story is ready to read",
+      });
+
+      setStory({
+        title: "",
+        content: "",
+        image: null as null | ImagePicker.ImagePickerAsset,
+      });
     } catch (error) {
-      setResponseMessage(`Error adding story. ${error}`);
-      console.error(error);
+      Toast.show({
+        type: "error",
+        text1: "Internal Server Eror",
+      });
     }
   };
 
@@ -107,30 +123,42 @@ export default function AddStory() {
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
         <Text style={styles.header}>Tell'em what you've done</Text>
-
         <TextInput
           style={styles.input}
           placeholder="Title"
           value={title}
-          onChangeText={setTitle}
+          onChangeText={(title) =>
+            setStory((story) => ({ ...story, title: title }))
+          }
         />
-
         <TextInput
           style={[styles.input, styles.textArea]}
           placeholder="Content"
-          value={content}
-          onChangeText={setContent}
+          value={story.content}
+          onChangeText={(content) =>
+            setStory((story) => ({ ...story, content: content }))
+          }
           multiline
         />
-
-        {/* Image Picker Button */}
-        <Button title="Pick an image" onPress={handleImagePick} />
-        <StoryCard story={storyPreview} isPreview />
-        <Button title="Submit Story" onPress={handleSubmit} />
-
-        {responseMessage ? (
-          <Text style={styles.responseMessage}>{responseMessage}</Text>
-        ) : null}
+        <Button
+          title="Show 'em through a representative picture"
+          onPress={handleImagePick}
+        />
+        <View style={styles.previewInfo}>
+          <FontAwesome5 name="info-circle" size={24} color="white" />
+          <Text
+            style={{
+              color: "#f4f4f4",
+              marginLeft: 10,
+            }}
+          >
+            This preview is not for you, is for thousand of people, think twice
+            how interesting will look for them, will they be convinced to read
+            your story?
+          </Text>
+        </View>
+        <StoryCard story={storyPreview as Story} isPreview />
+        <Button title="Tell 'em" onPress={handleSubmit} />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -164,5 +192,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: "red",
+  },
+  previewInfo: {
+    flexDirection: "row",
+    backgroundColor: "#333",
+    color: "#f4f4f4",
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 16,
   },
 });

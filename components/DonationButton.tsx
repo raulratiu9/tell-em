@@ -3,7 +3,7 @@ import { useStripe } from "@stripe/stripe-react-native";
 import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import ToastNotification from "./ToastNotification";
+import Toast from "react-native-toast-message";
 
 interface Props {
   storyId: number;
@@ -28,7 +28,7 @@ export default function DonationButton({ storyId }: Props) {
         },
         {
           headers: {
-            Authorization: `Bearer ${process.env.EXPO_PUBLIC_AUTH_TOKEN}`,
+            Authorization: `Bearer ${process.env.EXPO_PUBLIC_STRIPE_SECRET_KEY}`,
           },
         }
       );
@@ -41,43 +41,39 @@ export default function DonationButton({ storyId }: Props) {
       });
 
       if (sheetError) {
-        return (
-          <ToastNotification
-            type="error"
-            text1="Failed to initialize payment sheet"
-            text2={sheetError.message}
-          />
-        );
+        Toast.show({
+          type: "error",
+          text1: "Failed to initialize payment sheet",
+          text2: sheetError.message,
+        });
       }
 
       const { error: paymentError } = await presentPaymentSheet();
       if (paymentError) {
-        return (
-          <ToastNotification
-            type="error"
-            text1="Payment failed"
-            text2={paymentError.message}
-          />
-        );
+        Toast.show({
+          type: "error",
+          text1: "Payment failed",
+          text2: paymentError.message,
+        });
       } else {
-        <ToastNotification type="success" text1="Payment successful" />;
+        Toast.show({
+          type: "success",
+          text1: "Payment successful",
+        });
       }
     } catch (error) {
-      <ToastNotification
-        type="error"
-        text1="Internal Server Error"
-        text2={error?.toString()}
-      />;
+      Toast.show({
+        type: "error",
+        text1: "Internal Server Error",
+        text2: error?.toString(),
+      });
     }
   };
 
   return (
     <View>
       <TouchableOpacity onPress={() => createPaymentIntent(storyId)}>
-        <LinearGradient
-          colors={["#FF9A8B", "#FF6A88"]} // Purple gradient
-          style={styles.gradient}
-        >
+        <LinearGradient colors={["#FF9A8B", "#FF6A88"]} style={styles.gradient}>
           <FontAwesome5 name="hand-holding-heart" size={24} color="white" />
           <Text style={styles.text}>Donate</Text>
         </LinearGradient>

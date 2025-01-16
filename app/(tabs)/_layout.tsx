@@ -1,14 +1,16 @@
-import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
-import { Pressable } from "react-native";
+import { router, Tabs, useNavigation } from "expo-router";
 
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
+import { ComponentProps } from "react";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { Text, TouchableOpacity, View } from "react-native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
+  name: ComponentProps<typeof FontAwesome>["name"];
   color: string;
 }) {
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
@@ -16,6 +18,7 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const navigation = useNavigation();
 
   return (
     <Tabs
@@ -28,7 +31,15 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Stories",
-          tabBarIcon: ({ color }) => <TabBarIcon name="file" color={color} />,
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5
+              name="pen-nib"
+              size={28}
+              style={{ marginBottom: -3 }}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
@@ -37,6 +48,17 @@ export default function TabLayout() {
           title: "Add story",
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="plus-circle" color={color} />
+          ),
+          headerLeft: () => (
+            <View>
+              <TouchableOpacity
+                onPress={() => router.push("/")}
+                style={{ flexDirection: "row", alignItems: "center" }}
+              >
+                <MaterialIcons name="arrow-back-ios" size={24} color="black" />
+                <Text style={{ fontFamily: "", color: "black" }}>Back</Text>
+              </TouchableOpacity>
+            </View>
           ),
         }}
       />

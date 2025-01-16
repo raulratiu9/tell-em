@@ -1,7 +1,6 @@
 import { Story } from "@/types";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "expo-router";
 
 interface Props {
   story: Story;
@@ -11,26 +10,24 @@ interface Props {
 const MAX_CONTENT_CHARS_ALLOWED = 75;
 
 export default function StoryCard({ story, isPreview }: Props) {
-  const { id, title, content, image } = story;
+  const { title, content, image } = story;
 
   return (
     <View>
-      {image && (
-        <View style={styles.imageContainer}>
-          <Image
-            source={{
-              uri: isPreview
-                ? image
-                : `${process.env.EXPO_PUBLIC_BASE_API_URL}${image}`,
-            }}
-            style={styles.image}
-          />
-          <LinearGradient
-            colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.8)"]}
-            style={styles.gradientOverlay}
-          />
-        </View>
-      )}
+      <View style={styles.imageContainer}>
+        <Image
+          source={{
+            uri: isPreview
+              ? image
+              : `${process.env.EXPO_PUBLIC_BASE_API_URL}${image}`,
+          }}
+          style={styles.image}
+        />
+        <LinearGradient
+          colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.8)"]}
+          style={styles.gradientOverlay}
+        />
+      </View>
       <View style={styles.container}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.content}>

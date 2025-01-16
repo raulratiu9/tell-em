@@ -1,6 +1,7 @@
 import Feather from "@expo/vector-icons/Feather";
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet, Share, Alert } from "react-native";
+import Toast from "react-native-toast-message";
 
 interface Props {
   storyId: number;
@@ -15,16 +16,28 @@ export default function ShareButton({ storyId }: Props) {
 
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          console.log("Shared with activity type: ", result.activityType);
+          Toast.show({
+            type: "success",
+            text1: "Shared with activity type: ",
+            text2: result.activityType,
+          });
         } else {
-          console.log("Shared successfully!");
+          Toast.show({
+            type: "success",
+            text1: "Shared successfully!",
+          });
         }
       } else if (result.action === Share.dismissedAction) {
-        console.log("Share dismissed");
+        Toast.show({
+          type: "error",
+          text1: "Share dismissed!",
+        });
       }
     } catch (error) {
-      Alert.alert("Error", "Something went wrong while sharing!");
-      console.error(error);
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong while sharing!",
+      });
     }
   };
 
@@ -42,7 +55,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginLeft: 10,
     paddingVertical: 10,
-    // paddingHorizontal: 24,
     borderRadius: 8,
     alignItems: "center",
     height: 42,

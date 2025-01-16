@@ -5,56 +5,25 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  Button,
 } from "react-native";
-import axios from "axios";
+
 import { Story } from "@/types";
 import StoryCard from "@/components/StoryCard";
-import Animated, { FadeInUp } from "react-native-reanimated";
-import { router, useNavigation } from "expo-router";
-import ToastNotification from "@/components/ToastNotification";
-import Toast from "react-native-toast-message";
+import { router } from "expo-router";
+import { getStories } from "@/api/getStories";
 
 export default function StoriesFeed() {
-  const navigation = useNavigation();
-
-  const [stories, setStories] = useState([]);
+  const [stories, setStories] = useState<Story[]>([]);
 
   useEffect(() => {
-    const fetchStories = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.EXPO_PUBLIC_BASE_API_URL}api/stories`,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${process.env.EXPO_PUBLIC_AUTH_TOKEN}`,
-            },
-          }
-        );
-        setStories(response.data);
-      } catch (error) {
-        console.error("Error fetching stories:", error);
-      }
-    };
-
-    fetchStories();
+    getStories(setStories);
   }, []);
-
-  const showToast = () => {
-    Toast.show({
-      type: "success",
-      text1: "Hello",
-      text2: "This is some something 👋",
-    });
-  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Tell'em you've got new stories</Text>
-      <Button title="Show Toast" onPress={showToast} />
       <FlatList
-        data={stories.slice(-10)}
+        data={stories}
         keyExtractor={(item: Story) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -72,7 +41,7 @@ export default function StoriesFeed() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    paddingHorizontal: 24,
     justifyContent: "center",
     fontFamily: "MontserratBlack",
     overflowX: "hidden",
@@ -80,7 +49,8 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: "bold",
-    marginVertical: 20,
+    marginTop: 60,
+    marginBottom: 40,
     textAlign: "left",
   },
 });
