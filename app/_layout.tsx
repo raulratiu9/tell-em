@@ -12,7 +12,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import Feather from "@expo/vector-icons/Feather";
 
-import { useColorScheme } from "@/components/useColorScheme";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import Toast from "react-native-toast-message";
 import toastConfig from "@/utils/toastConfig";
 import { StripeProvider } from "@stripe/stripe-react-native";

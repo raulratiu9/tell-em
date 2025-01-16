@@ -2,8 +2,8 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { router, Tabs, useNavigation } from "expo-router";
 
 import Colors from "@/constants/Colors";
-import { useColorScheme } from "@/components/useColorScheme";
-import { useClientOnlyValue } from "@/components/useClientOnlyValue";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { useClientOnlyValue } from "@/hooks/useClientOnlyValue";
 import { ComponentProps } from "react";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -60,20 +60,6 @@ export default function TabLayout() {
               </TouchableOpacity>
             </View>
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color }) => <TabBarIcon name="car" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="history"
-        options={{
-          title: "History",
-          tabBarIcon: ({ color }) => <TabBarIcon name="car" color={color} />,
         }}
       />
     </Tabs>

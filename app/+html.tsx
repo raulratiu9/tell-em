@@ -10,7 +10,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <ScrollViewStyleReset />
+        <ScrollViewStyleReset  />
         <style dangerouslySetInnerHTML={{ __html: responsiveBackground }} />
       </head>
       <body>{children}</body>
@@ -22,7 +22,13 @@ const responsiveBackground = `
 body {
   background-color: #fff;
   color: "#333";
-
+  overflow: hidden;
+}
+* {
+  scrollbar-width: none; /* Firefox */
+}
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }
 @media (prefers-color-scheme: dark) {
   body {

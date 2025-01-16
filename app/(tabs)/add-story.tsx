@@ -1,12 +1,12 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   View,
-  TextInput,
-  Button,
   StyleSheet,
   Text,
   Keyboard,
   TouchableWithoutFeedback,
+  TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import StoryCard from "@/components/StoryCard";
@@ -15,6 +15,9 @@ import { Story } from "@/types";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { router } from "expo-router";
 import postStory from "@/api/postStory";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 export default function AddStory() {
   const [story, setStory] = useState({
@@ -121,45 +124,69 @@ export default function AddStory() {
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={styles.container}>
-        <Text style={styles.header}>Tell'em what you've done</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Title"
-          value={title}
-          onChangeText={(title) =>
-            setStory((story) => ({ ...story, title: title }))
-          }
-        />
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Content"
-          value={story.content}
-          onChangeText={(content) =>
-            setStory((story) => ({ ...story, content: content }))
-          }
-          multiline
-        />
-        <Button
-          title="Show 'em through a representative picture"
-          onPress={handleImagePick}
-        />
-        <View style={styles.previewInfo}>
-          <FontAwesome5 name="info-circle" size={24} color="white" />
-          <Text
-            style={{
-              color: "#f4f4f4",
-              marginLeft: 10,
-            }}
-          >
-            This preview is not for you, is for thousand of people, think twice
-            how interesting will look for them, will they be convinced to read
-            your story?
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.container}>
+          <Text style={styles.header}>Tell'em what you've done</Text>
+          <Input
+            placeholder="Title"
+            value={title}
+            onChangeText={(title) =>
+              setStory((story) => ({ ...story, title: title }))
+            }
+          />
+          <Input
+            style={styles.textArea}
+            placeholder="Content"
+            value={story.content}
+            onChangeText={(content) =>
+              setStory((story) => ({ ...story, content: content }))
+            }
+            multiline
+          />
+          <Text style={styles.header}>
+            {!image ? "Upload a file" : "Preview"}
           </Text>
+          {!image ? (
+            <TouchableOpacity
+              onPress={handleImagePick}
+              style={{
+                borderColor: "#333",
+                borderWidth: 2,
+                marginBottom: 20,
+                borderRadius: 8,
+              }}
+            >
+              <FontAwesome
+                name="file-picture-o"
+                size={68}
+                color="#333"
+                style={{
+                  marginVertical: 60,
+                  margin: "auto",
+                }}
+              />
+            </TouchableOpacity>
+          ) : (
+            <React.Fragment>
+              <View style={styles.previewInfo}>
+                <FontAwesome5 name="info-circle" size={24} color="white" />
+                <Text
+                  style={{
+                    color: "#f4f4f4",
+                    marginLeft: 10,
+                  }}
+                >
+                  This preview is not for you, is for thousand of people, think
+                  twice how interesting will look for them, will they be
+                  convinced to read your story?
+                </Text>
+              </View>
+              <StoryCard story={storyPreview as Story} isPreview />
+            </React.Fragment>
+          )}
+          <Button title="Tell 'em" onPress={handleSubmit} disabled={!image} />
         </View>
-        <StoryCard story={storyPreview as Story} isPreview />
-        <Button title="Tell 'em" onPress={handleSubmit} />
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 }
@@ -170,6 +197,7 @@ const styles = StyleSheet.create({
     padding: 24,
     justifyContent: "center",
     fontFamily: "MontserratBlack",
+    overflow: "scroll",
   },
   header: {
     fontSize: 24,

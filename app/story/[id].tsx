@@ -14,6 +14,7 @@ import {
   Animated,
   TouchableOpacity,
 } from "react-native";
+import NotFoundScreen from "../+not-found";
 
 const StoryDetails = ({}) => {
   const searchParams = useSearchParams();
@@ -55,7 +56,7 @@ const StoryDetails = ({}) => {
 
         setStory(response.data);
       } catch (error) {
-        console.error("Error fetching story:", error);
+        return <NotFoundScreen />;
       }
     };
 
@@ -64,7 +65,7 @@ const StoryDetails = ({}) => {
     }
   }, [id]);
 
-  if (!story) return "Tell'em there is no story here!";
+  if (!story) return <NotFoundScreen />;
 
   const images = [
     `${process.env.EXPO_PUBLIC_BASE_API_URL}${story.image}`,
@@ -81,7 +82,7 @@ const StoryDetails = ({}) => {
           Math.floor(scrollPosition / story.content.length),
           images.length - 1
         );
-        console.log(imageIndex, "index");
+
         if (imageIndex < 0) setCurrentImageIndex(0);
         else setCurrentImageIndex(imageIndex);
       },
@@ -101,6 +102,7 @@ const StoryDetails = ({}) => {
         contentContainerStyle={styles.scrollContainer}
         onScroll={handleScroll}
         scrollEventThrottle={100}
+        showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>{story.title}</Text>
         <View style={styles.divider} />
@@ -110,6 +112,7 @@ const StoryDetails = ({}) => {
         </View>
         <Text style={styles.content}>{story.content}</Text>
       </Animated.ScrollView>
+
       <View style={styles.imageContainer}>
         <Animated.Image
           source={{ uri: images[currentImageIndex] }}
@@ -153,10 +156,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 250,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 100 },
-    shadowOpacity: 0.1,
   },
   gradientOverlay: {
     position: "absolute",

@@ -5,6 +5,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 
 import { Story } from "@/types";
@@ -20,21 +21,23 @@ export default function StoriesFeed() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Tell'em you've got new stories</Text>
-      <FlatList
-        data={stories}
-        keyExtractor={(item: Story) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            key={item.title}
-            onPress={() => router.push(`/story/${item.id}`)}
-          >
-            <StoryCard key={item.title} story={item} />
-          </TouchableOpacity>
-        )}
-      />
-    </View>
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <View style={styles.container}>
+        <Text style={styles.header}>Tell'em you've got new stories</Text>
+        <FlatList
+          data={stories}
+          keyExtractor={(item: Story) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              key={item.title}
+              onPress={() => router.push(`/story/${item.id}`)}
+            >
+              <StoryCard key={item.title} story={item} />
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    </ScrollView>
   );
 }
 
