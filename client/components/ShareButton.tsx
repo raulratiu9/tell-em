@@ -1,7 +1,6 @@
-import Feather from "@expo/vector-icons/Feather";
-import React from "react";
-import { TouchableOpacity, Text, StyleSheet, Share, Alert } from "react-native";
-import Toast from "react-native-toast-message";
+import Feather from '@expo/vector-icons/Feather';
+import { TouchableOpacity, StyleSheet, Share } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 interface Props {
   storyId: number;
@@ -17,26 +16,27 @@ export default function ShareButton({ storyId }: Props) {
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
           Toast.show({
-            type: "success",
-            text1: "Shared with activity type: ",
+            type: 'success',
+            text1: 'Shared with activity type: ',
             text2: result.activityType,
           });
         } else {
           Toast.show({
-            type: "success",
-            text1: "Shared successfully!",
+            type: 'success',
+            text1: 'Shared successfully!',
           });
         }
       } else if (result.action === Share.dismissedAction) {
         Toast.show({
-          type: "error",
-          text1: "Share dismissed!",
+          type: 'error',
+          text1: 'Share dismissed!',
         });
       }
     } catch (error) {
       Toast.show({
-        type: "error",
-        text1: "Something went wrong while sharing!",
+        type: 'error',
+        text1: 'Something went wrong while sharing!',
+        text2: (error as Error).message,
       });
     }
   };
@@ -50,13 +50,13 @@ export default function ShareButton({ storyId }: Props) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#333",
+    backgroundColor: '#333',
     width: 40,
     marginTop: 10,
     marginLeft: 10,
     paddingVertical: 10,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     height: 42,
   },
 });

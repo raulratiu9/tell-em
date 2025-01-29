@@ -1,6 +1,6 @@
-import { Story } from "@/types";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { Story } from '@/types';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface Props {
   story: Story;
@@ -17,14 +17,12 @@ export default function StoryCard({ story, isPreview }: Props) {
       <View style={styles.imageContainer}>
         <Image
           source={{
-            uri: isPreview
-              ? image
-              : `${process.env.EXPO_PUBLIC_BASE_API_URL}${image}`,
+            uri: isPreview ? image : `${process.env.EXPO_PUBLIC_BASE_API_URL}${image}`,
           }}
           style={styles.image}
         />
         <LinearGradient
-          colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.8)"]}
+          colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.8)']}
           style={styles.gradientOverlay}
         />
       </View>
@@ -40,11 +38,11 @@ export default function StoryCard({ story, isPreview }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 4,
@@ -56,43 +54,43 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 20,
   },
   story: {
     marginBottom: 15,
     padding: 10,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
   },
   title: {
-    fontFamily: "MontserratBold",
+    fontFamily: 'MontserratBold',
     fontSize: 18,
   },
   content: {
-    fontFamily: "MontserratRegular",
+    fontFamily: 'MontserratRegular',
     lineHeight: 25,
   },
   image: {
-    width: "100%",
+    width: '100%',
     height: 200,
-    resizeMode: "cover",
+    resizeMode: 'cover',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
   imageContainer: {
-    backgroundColor: "#fff",
-    shadowColor: "#000",
+    backgroundColor: '#fff',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 8,
-    overflow: "hidden",
+    overflow: 'hidden',
     borderTopRightRadius: 16,
     borderTopLeftRadius: 16,
   },
   gradientOverlay: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,

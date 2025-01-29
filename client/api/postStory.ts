@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 export default function postStory(formData: FormData) {
   const response = axios.post(
@@ -6,10 +6,10 @@ export default function postStory(formData: FormData) {
     formData,
     {
       headers: {
-        "Content-Type": "multipart/form-data",
+        'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${process.env.EXPO_PUBLIC_AUTH_TOKEN}`,
       },
-    }
+    },
   );
 
   return response;

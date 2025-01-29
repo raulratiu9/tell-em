@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-} from "react-native";
+} from 'react-native';
 
-import { Story } from "@/types";
-import StoryCard from "@/components/StoryCard";
-import { router } from "expo-router";
-import { getStories } from "@/api/getStories";
+import { Story } from '@/types';
+import StoryCard from '@/components/StoryCard';
+import { router } from 'expo-router';
+import { getStories } from '@/api/getStories';
 
 export default function StoriesFeed() {
   const [stories, setStories] = useState<Story[]>([]);
@@ -45,15 +45,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
-    justifyContent: "center",
-    fontFamily: "MontserratBlack",
-    overflowX: "hidden",
+    justifyContent: 'center',
+    fontFamily: 'MontserratBlack',
+    overflowX: 'hidden',
   },
   header: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: 60,
     marginBottom: 40,
-    textAlign: "left",
+    textAlign: 'left',
   },
 });

@@ -1,6 +1,7 @@
-import { ScrollViewStyleReset } from "expo-router/html";
+import { ScrollViewStyleReset } from 'expo-router/html';
+import { ReactNode } from 'react';
 
-export default function Root({ children }: { children: React.ReactNode }) {
+export default function Root({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -10,7 +11,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <ScrollViewStyleReset  />
+        <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: responsiveBackground }} />
       </head>
       <body>{children}</body>

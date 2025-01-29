@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef } from 'react';
 import {
   Animated,
   TouchableWithoutFeedback,
@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
-} from "react-native";
+} from 'react-native';
 
 interface ButtonProps {
   title: string;
@@ -66,30 +66,30 @@ const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#333",
+    backgroundColor: '#333',
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 8,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 4, // Android shadow
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   text: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "600",
-    textTransform: "uppercase",
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   disabledButton: {
-    backgroundColor: "#ddd",
+    backgroundColor: '#ddd',
     shadowOpacity: 0, // No shadow for disabled state
   },
   disabledText: {
-    color: "#999",
+    color: '#999',
   },
 });
 

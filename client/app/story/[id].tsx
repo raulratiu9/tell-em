@@ -1,25 +1,19 @@
-import DonationButton from "@/components/DonationButton";
-import ShareButton from "@/components/ShareButton";
-import { Story } from "@/types";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import axios from "axios";
-import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "expo-router";
-import { useSearchParams } from "expo-router/build/hooks";
-import { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  TouchableOpacity,
-} from "react-native";
-import NotFoundScreen from "../+not-found";
+import DonationButton from '@/components/DonationButton';
+import ShareButton from '@/components/ShareButton';
+import { Story } from '@/types';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import axios from 'axios';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from 'expo-router';
+import { useSearchParams } from 'expo-router/build/hooks';
+import { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import NotFoundScreen from '../+not-found';
 
-const StoryDetails = ({}) => {
+const StoryDetails = () => {
   const searchParams = useSearchParams();
   const navigation = useNavigation();
-  const id = searchParams.get("id");
+  const id = searchParams.get('id');
 
   navigation.setOptions({
     title: "Tell 'em",
@@ -27,10 +21,10 @@ const StoryDetails = ({}) => {
       <View>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={{ flexDirection: "row", alignItems: "center" }}
+          style={{ flexDirection: 'row', alignItems: 'center' }}
         >
           <MaterialIcons name="arrow-back-ios" size={24} color="black" />
-          <Text style={{ fontFamily: "", color: "black" }}>Back</Text>
+          <Text style={{ fontFamily: '', color: 'black' }}>Back</Text>
         </TouchableOpacity>
       </View>
     ),
@@ -48,15 +42,19 @@ const StoryDetails = ({}) => {
           `${process.env.EXPO_PUBLIC_BASE_API_URL}api/stories/${id}`,
           {
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
               Authorization: `Bearer ${process.env.EXPO_PUBLIC_AUTH_TOKEN}`,
             },
-          }
+          },
         );
 
         setStory(response.data);
       } catch (error) {
-        return <NotFoundScreen />;
+        return (
+          <NotFoundScreen>
+            <Text>{(error as Error).message}</Text>
+          </NotFoundScreen>
+        );
       }
     };
 
@@ -80,19 +78,19 @@ const StoryDetails = ({}) => {
         const scrollPosition = event.nativeEvent.contentOffset.y;
         const imageIndex = Math.min(
           Math.floor(scrollPosition / story.content.length),
-          images.length - 1
+          images.length - 1,
         );
 
         if (imageIndex < 0) setCurrentImageIndex(0);
         else setCurrentImageIndex(imageIndex);
       },
-    }
+    },
   );
 
   const fadeAnim = scrollY.interpolate({
     inputRange: [0, 300, 600],
     outputRange: [1, 0.3, 1],
-    extrapolate: "clamp",
+    extrapolate: 'clamp',
   });
 
   return (
@@ -106,7 +104,7 @@ const StoryDetails = ({}) => {
       >
         <Text style={styles.title}>{story.title}</Text>
         <View style={styles.divider} />
-        <View style={{ alignItems: "flex-start", flexDirection: "row" }}>
+        <View style={{ alignItems: 'flex-start', flexDirection: 'row' }}>
           <DonationButton storyId={story.id} />
           <ShareButton storyId={story.id} />
         </View>
@@ -119,7 +117,7 @@ const StoryDetails = ({}) => {
           style={[styles.image, { opacity: fadeAnim }]}
         />
         <LinearGradient
-          colors={["rgba(255,255,255,0)", "rgba(255,255,255,1)"]}
+          colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
           style={styles.gradientOverlay}
         />
       </View>
@@ -130,7 +128,7 @@ const StoryDetails = ({}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     padding: 32,
   },
   scrollView: {
@@ -141,38 +139,38 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 42,
-    textAlign: "left",
-    fontFamily: "MontserratBold",
+    textAlign: 'left',
+    fontFamily: 'MontserratBold',
   },
   content: {
     marginTop: 16,
     fontSize: 16,
     lineHeight: 28,
-    fontFamily: "MontserratRegular",
+    fontFamily: 'MontserratRegular',
   },
   imageContainer: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     height: 250,
   },
   gradientOverlay: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 250,
     left: 0,
     right: 0,
     height: 80,
   },
   image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   divider: {
     width: 96,
     height: 8,
-    backgroundColor: "black",
+    backgroundColor: 'black',
   },
 });
 
