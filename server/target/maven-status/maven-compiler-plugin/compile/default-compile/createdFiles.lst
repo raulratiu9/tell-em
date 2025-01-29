@@ -1,0 +1,11 @@
+com\tellem\Application.class
+com\tellem\config\SecurityConfig.class
+com\tellem\controller\authentication\LoginController.class
+com\tellem\model\User.class
+com\tellem\repository\StoryRepository.class
+com\tellem\repository\UserRepository.class
+com\tellem\model\Story.class
+com\tellem\service\StoryService.class
+com\tellem\controller\UserController.class
+com\tellem\controller\StoryController.class
+com\tellem\service\UserService.class
