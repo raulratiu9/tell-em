@@ -6,19 +6,42 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Button,
 } from 'react-native';
 
 import { Story } from '@/types';
 import StoryCard from '@/components/StoryCard';
 import { router } from 'expo-router';
 import { getStories } from '@/api/getStories';
+import { getToken } from '@/utils/authStorage';
 
 export default function StoriesFeed() {
   const [stories, setStories] = useState<Story[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    getStories(setStories);
+    // Check if the user is authenticated by checking the JWT token
+    const checkAuth = async () => {
+      const token = await getToken();
+      if (token) {
+        setIsAuthenticated(true);
+        getStories(setStories);
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
   }, []);
+
+  if (isAuthenticated === false) {
+    // If not authenticated, show a message to log in
+    return (
+      <View style={styles.container}>
+        <Text>You must be logged in to see stories.</Text>
+        <Button title="Login" onPress={() => router.push('/login')} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>

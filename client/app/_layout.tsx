@@ -1,6 +1,11 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+  ThemeProvider,
+} from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -13,6 +18,7 @@ import Toast from 'react-native-toast-message';
 import toastConfig from '@/utils/toastConfig';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import DeepLinkHandler from '@/utils/deepLinkHandler';
 
 export { ErrorBoundary } from 'expo-router';
 
