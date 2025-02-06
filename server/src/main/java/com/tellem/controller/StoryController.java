@@ -74,26 +74,21 @@ public class StoryController {
         }
     }
 
-    // Save image to local file system
     private String saveImage(MultipartFile image) throws IOException {
-        // Create the uploads directory if it doesn't exist
         String uploadDir = "src/main/resources/static";
         File uploadDirFile = new File(uploadDir);
         if (!uploadDirFile.exists()) {
             uploadDirFile.mkdirs();
         }
 
-        // Get the original file name
         String originalFileName = image.getOriginalFilename();
         if (originalFileName != null) {
-            // Generate a unique name for the file
             String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
             Path path = Paths.get(uploadDir + File.separator + uniqueFileName);
 
-            // Save the file to the disk
             Files.copy(image.getInputStream(), path);
 
-            return uniqueFileName;  // Return the file path
+            return uniqueFileName;
         } else {
             throw new IOException("File name is invalid.");
         }

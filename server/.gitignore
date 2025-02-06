@@ -1,0 +1,71 @@
+# Ignore Maven build directory
+target/
+
+# Ignore .classpath, .project, .settings (Eclipse project files)
+.classpath
+.project
+.settings/
+
+# Ignore IntelliJ IDEA project files
+.idea/
+*.iml
+*.iws
+out/
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore compiled Java files
+*.class
+*.jar
+*.war
+*.ear
+
+# Ignore logs and temp files
+logs/
+*.log
+hs_err_pid*
+
+# Ignore environment variables and sensitive files
+.env
+*.properties
+application-*.yml
+application-*.yaml
+secrets/
+private.key
+public.key
+
+# Ignore generated files from Lombok
+.lombok/
+
+# Ignore dependency caching
+.m2/
+node_modules/
+
+# Ignore database files
+*.db
+*.sqlite
+
+# Ignore test reports
+surefire-reports/
+test-output/
+
+# Ignore built React/Angular frontend (if applicable)
+frontend/build/
+frontend/node_modules/
+
+# Ignore generated API documentation
+api-docs/
+swagger-ui/
+
+# Ignore Spring Boot devtools restart files
+.spring-boot-devtools.properties
+
+# Ignore Docker and Kubernetes files (optional)
+docker-compose.override.yml
+*.pid
+*.tar

@@ -19,7 +19,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Ensure this path points to the correct location of your 'uploads' folder
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:./server/uploads/");  // This assumes the 'uploads' folder is in the root directory
     }
