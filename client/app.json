@@ -17,7 +17,9 @@
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
-        "CFBundleLocalizations": ["fr"]
+        "CFBundleLocalizations": [
+          "fr"
+        ]
       }
     },
     "android": {
@@ -43,6 +45,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "52ade32c-ad66-49c3-aee8-3005d4e9b161"
+      }
+    },
+    "owner": "raulratiu9"
   }
 }
