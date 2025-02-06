@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   TouchableWithoutFeedback,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import StoryCard from '@/components/StoryCard';
@@ -18,14 +19,117 @@ import postStory from '@/api/postStory';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { Audio } from 'expo-av';
+import { Base64 } from 'js-base64';
+import { Picker } from '@react-native-picker/picker';
+
+export interface VoiceDto {
+  name: string;
+  gender: string;
+  displayName: string;
+}
 
 export default function AddStory() {
   const [story, setStory] = useState({
     title: '',
     content: '',
     image: null as null | ImagePicker.ImagePickerAsset,
+    audio: null as null | Audio.Sound,
   });
-  const { title, content, image } = story;
+  const [voiceover, setVoiceover] = useState({
+    isLoading: false,
+    isPlaying: false,
+    gender: 'MALE',
+    voice: { name: 'en-US-Casual-K', gender: 'MALE' },
+  });
+  const [voices, setVoices] = useState([]);
+  const { title, content, image, audio } = story;
+
+  useEffect(() => {
+    const fetchVoices = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_BASE_API_URL}api/voiceover/voices`,
+        );
+        if (response.ok) {
+          const voiceList = await response.json();
+          setVoices(voiceList);
+          setVoiceover((prevState) => ({ ...prevState, voice: voiceList[0] }));
+        } else {
+          console.error('Error fetching voices:', response.status, await response.text());
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setVoiceover((prevState) => ({ ...prevState, isLoading: false }));
+      }
+    };
+
+    fetchVoices();
+  }, []);
+
+  const generateTTS = async (isPreview: boolean = false) => {
+    const voiceText = isPreview ? "Tell 'em your story with me" : content;
+    setVoiceover((prevState) => ({ ...prevState, isLoading: true }));
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_BASE_API_URL}api/voiceover/tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: voiceText,
+            voice: voiceover.voice,
+          }),
+        },
+      );
+
+      if (response.ok) {
+        const audioBytes = await response.arrayBuffer();
+
+        const base64Audio = Base64.fromUint8Array(new Uint8Array(audioBytes));
+        const audioUri = `data:audio/mpeg;base64,${base64Audio}`;
+
+        const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
+        await sound.playAsync();
+
+        !isPreview && setStory((prevState) => ({ ...prevState, audio: sound }));
+      } else {
+        console.error('Error generating TTS:', response.status, await response.text());
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setVoiceover((prevState) => ({ ...prevState, isLoading: false }));
+    }
+  };
+
+  const playSound = async () => {
+    if (audio) {
+      setVoiceover((prevState) => ({ ...prevState, isPlaying: true }));
+      try {
+        await audio.playAsync();
+        await audio.replayAsync();
+      } catch (error) {
+        console.error('Error playing sound:', error);
+      } finally {
+        setVoiceover((prevState) => ({ ...prevState, isPlaying: false }));
+      }
+    }
+  };
+
+  const stopSound = async () => {
+    if (audio && voiceover.isPlaying) {
+      try {
+        await audio.stopAsync();
+        setVoiceover((prevState) => ({ ...prevState, isPlaying: false }));
+      } catch (error) {
+        console.error('Error stopping sound:', error);
+      }
+    }
+  };
 
   const handleImagePick = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -59,7 +163,7 @@ export default function AddStory() {
     if (image) {
       const uri = image.uri;
       const type = uri.substring(uri.lastIndexOf('.') + 1);
-      const fileName = uri.replace(/^.*[\\\/]/, '');
+      const fileName = uri.replace(/^.*[\\/]/, '');
       const imageBlob = await fetch(uri)
         .then((res) => res.blob())
         .catch((error) => {
@@ -95,6 +199,29 @@ export default function AddStory() {
     try {
       const response = await postStory(formData);
 
+      if (audio) {
+        const storeResponse = await fetch(
+          `${process.env.EXPO_PUBLIC_BASE_API_URL}/api/voiceover`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ storyId: response.data, audio }),
+          },
+        );
+
+        if (storeResponse) {
+          Toast.show({
+            type: 'success',
+            text1: 'Voiceover has been uploaded',
+          });
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: 'Audio is not valid',
+          });
+        }
+      }
+
       router.push(`/story/${response.data}`);
 
       Toast.show({
@@ -106,6 +233,7 @@ export default function AddStory() {
         title: '',
         content: '',
         image: null as null | ImagePicker.ImagePickerAsset,
+        audio: null,
       });
     } catch (error) {
       Toast.show({
@@ -142,6 +270,47 @@ export default function AddStory() {
             }
             multiline
           />
+          <Text>Select voice</Text>
+          {voiceover.isLoading ? (
+            <ActivityIndicator />
+          ) : (
+            <Picker
+              selectedValue={voiceover.voice}
+              style={{ height: 50, width: 200 }}
+              onValueChange={(voice: VoiceDto) =>
+                setVoiceover((voiceover) => ({ ...voiceover, voice: voice }))
+              }
+            >
+              {voices.map((voice: VoiceDto) => (
+                <Picker.Item
+                  key={voice.name}
+                  label={`${voice.displayName}`}
+                  value={voice}
+                />
+              ))}
+            </Picker>
+          )}
+          <Button
+            title={'Play voice'}
+            onPress={() => generateTTS(true)}
+            disabled={voiceover.isLoading}
+          />
+          {content && (
+            <Button
+              title={'Generate voiceover'}
+              onPress={() => generateTTS(false)}
+              disabled={voiceover.isLoading}
+            />
+          )}
+          {audio && (
+            <View style={styles.audioControls}>
+              <Button
+                title={voiceover.isPlaying ? 'Stop' : 'Play'}
+                onPress={voiceover.isPlaying ? stopSound : playSound}
+                disabled={voiceover.isLoading}
+              />
+            </View>
+          )}
           <Text style={styles.header}>{!image ? 'Upload a file' : 'Preview'}</Text>
           {!image ? (
             <TouchableOpacity
@@ -225,5 +394,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginVertical: 16,
+  },
+  textInput: {
+    height: 150,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    padding: 10,
+    textAlignVertical: 'top', // Align text to the top
+  },
+  audioControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around', // Distribute buttons evenly
+    marginTop: 10,
   },
 });
