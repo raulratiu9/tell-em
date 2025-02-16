@@ -13,6 +13,7 @@ import Toast from 'react-native-toast-message';
 import toastConfig from '@/utils/toastConfig';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -31,6 +32,7 @@ export default function RootLayout() {
     ...FontAwesome5.font,
     ...Feather.font,
     ...MaterialIcons.font,
+    ...Ionicons.font,
   });
 
   useEffect(() => {

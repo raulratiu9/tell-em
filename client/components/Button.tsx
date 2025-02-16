@@ -9,11 +9,12 @@ import {
 } from 'react-native';
 
 interface ButtonProps {
-  title: string;
+  title?: string;
   onPress: () => void;
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
+  children: React.ReactElement;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -22,6 +23,7 @@ const Button: React.FC<ButtonProps> = ({
   style,
   textStyle,
   disabled = false,
+  children,
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -56,9 +58,13 @@ const Button: React.FC<ButtonProps> = ({
           disabled && styles.disabledButton,
         ]}
       >
-        <Text style={[styles.text, textStyle, disabled && styles.disabledText]}>
-          {title}
-        </Text>
+        {children ? (
+          children
+        ) : (
+          <Text style={[styles.text, textStyle, disabled && styles.disabledText]}>
+            {title}
+          </Text>
+        )}
       </Animated.View>
     </TouchableWithoutFeedback>
   );

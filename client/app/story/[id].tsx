@@ -15,21 +15,6 @@ const StoryDetails = () => {
   const navigation = useNavigation();
   const id = searchParams.get('id');
 
-  navigation.setOptions({
-    title: "Tell 'em",
-    headerLeft: () => (
-      <View>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ flexDirection: 'row', alignItems: 'center' }}
-        >
-          <MaterialIcons name="arrow-back-ios" size={24} color="black" />
-          <Text style={{ fontFamily: '', color: 'black' }}>Back</Text>
-        </TouchableOpacity>
-      </View>
-    ),
-  });
-
   const [story, setStory] = useState<Story>();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -60,8 +45,21 @@ const StoryDetails = () => {
 
     if (id) {
       fetchStory();
+      navigation.setOptions({
+        headerLeft: () => (
+          <View>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ flexDirection: 'row', alignItems: 'center' }}
+            >
+              <MaterialIcons name="arrow-back-ios" size={24} color="black" />
+              <Text style={{ fontFamily: '', color: 'black' }}>Back</Text>
+            </TouchableOpacity>
+          </View>
+        ),
+      });
     }
-  }, [id]);
+  }, [id, navigation]);
 
   if (!story) return <NotFoundScreen />;
 

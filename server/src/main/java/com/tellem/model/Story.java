@@ -29,8 +29,8 @@ public class Story {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public void setAuthorId(Long authorId, UserRepository userRepository) {
-        User user = userRepository.findById(authorId).orElse(null);
+    public void setAuthorId(String authorId, UserRepository userRepository) {
+        User user = userRepository.findById(authorId);
         this.author = user;
     }
 

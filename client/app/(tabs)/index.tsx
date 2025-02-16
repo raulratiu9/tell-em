@@ -25,6 +25,7 @@ export default function StoriesFeed() {
       <View style={styles.container}>
         <Text style={styles.header}>Tell'em you've got new stories</Text>
         <FlatList
+          scrollEnabled={false}
           data={stories}
           keyExtractor={(item: Story) => item.id.toString()}
           renderItem={({ item }) => (

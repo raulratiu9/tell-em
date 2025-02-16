@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/stories")
@@ -45,7 +44,7 @@ public class StoryController {
             @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam("image") MultipartFile image,
-            @RequestParam("author_id") Long authorId) {
+            @RequestParam("author_id") String authorId) {
 
         try {
             Story story = new Story();

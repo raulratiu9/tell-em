@@ -22,6 +22,9 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Audio } from 'expo-av';
 import { Base64 } from 'js-base64';
 import { Picker } from '@react-native-picker/picker';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Sound } from 'expo-av/build/Audio';
 
 export interface VoiceDto {
   name: string;
@@ -43,6 +46,7 @@ export default function AddStory() {
     voice: { name: 'en-US-Casual-K', gender: 'MALE' },
   });
   const [voices, setVoices] = useState([]);
+  const [bgMusic, setBgMusic] = useState(null as null | Sound);
   const { title, content, image, audio } = story;
 
   useEffect(() => {
@@ -67,6 +71,13 @@ export default function AddStory() {
 
     fetchVoices();
   }, []);
+
+  const playBackgroundMusic = async () => {
+    const { sound } = await Audio.Sound.createAsync(require('../../assets/music.mp3'));
+    sound.setVolumeAsync(0.5);
+    setBgMusic(sound);
+    await sound.playAsync();
+  };
 
   const generateTTS = async (isPreview: boolean = false) => {
     const voiceText = isPreview ? "Tell 'em your story with me" : content;
@@ -155,7 +166,7 @@ export default function AddStory() {
 
     const formData = new FormData();
 
-    const authorId = '1'; //TODO: Remove hardcoded value after implementing OAuth2 properly
+    const authorId = 'f0ec5ca6-0820-4a62-8302-6d8f95ce3a8a'; //TODO: Remove hardcoded value after implementing OAuth2 properly
     formData.append('title', title);
     formData.append('content', content);
     formData.append('author_id', authorId);
@@ -201,7 +212,7 @@ export default function AddStory() {
 
       if (audio) {
         const storeResponse = await fetch(
-          `${process.env.EXPO_PUBLIC_BASE_API_URL}/api/voiceover`,
+          `${process.env.EXPO_PUBLIC_BASE_API_URL}/api/voiceover/`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -308,7 +319,16 @@ export default function AddStory() {
                 title={voiceover.isPlaying ? 'Stop' : 'Play'}
                 onPress={voiceover.isPlaying ? stopSound : playSound}
                 disabled={voiceover.isLoading}
-              />
+              >
+                {voiceover.isPlaying ? (
+                  <MaterialIcons name="play-circle" size={24} color="white" />
+                ) : (
+                  <FontAwesome5 name="play-circle" size={24} color="white" />
+                )}
+              </Button>
+              <Button onPress={bgMusic ? () => bgMusic.stopAsync() : playBackgroundMusic}>
+                <Ionicons name="musical-note" size={24} color="white" />
+              </Button>
             </View>
           )}
           <Text style={styles.header}>{!image ? 'Upload a file' : 'Preview'}</Text>
