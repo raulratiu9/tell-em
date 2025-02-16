@@ -1,4 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import "@/global.css";
+import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -47,22 +49,22 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return <GluestackUIProvider mode="light"><RootLayoutNav /></GluestackUIProvider>;
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <StripeProvider
-        publishableKey={`${process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}`}
-      >
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-        <Toast config={toastConfig} />
-      </StripeProvider>
-    </ThemeProvider>
+    <GluestackUIProvider mode="light"><ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <StripeProvider
+          publishableKey={`${process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}`}
+        >
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+          <Toast config={toastConfig} />
+        </StripeProvider>
+      </ThemeProvider></GluestackUIProvider>
   );
 }
