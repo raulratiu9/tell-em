@@ -7,7 +7,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useSearchParams } from 'expo-router/build/hooks';
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import { View, Animated, TouchableOpacity } from 'react-native';
+import { Box, Text } from '@gluestack-ui/themed';
+
 import NotFoundScreen from '../+not-found';
 
 const StoryDetails = () => {
@@ -50,11 +52,7 @@ const StoryDetails = () => {
 
         setStory(response.data);
       } catch (error) {
-        return (
-          <NotFoundScreen>
-            <Text>{(error as Error).message}</Text>
-          </NotFoundScreen>
-        );
+        console.error(error);
       }
     };
 
@@ -63,7 +61,15 @@ const StoryDetails = () => {
     }
   }, [id]);
 
-  if (!story) return <NotFoundScreen />;
+  if (!story)
+    return (
+      <NotFoundScreen>
+        <Text>
+          There was a problem rendering the story or the story does not exist anymore. Try
+          again later.
+        </Text>
+      </NotFoundScreen>
+    );
 
   const images = [
     `${process.env.EXPO_PUBLIC_BASE_API_URL}${story.image}`,
@@ -94,84 +100,95 @@ const StoryDetails = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <Box {...containerStyles}>
       <Animated.ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContainer}
+        style={scrollView}
+        contentContainerStyle={scrollContainerStyles as Record<string, string>}
         onScroll={handleScroll}
         scrollEventThrottle={100}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{story.title}</Text>
-        <View style={styles.divider} />
-        <View style={{ alignItems: 'flex-start', flexDirection: 'row' }}>
+        <Text {...titleStyles}>{story.title}</Text>
+        <Box {...dividerStyles} />
+        <Box {...buttonsContainerStyles}>
           <DonationButton storyId={story.id} />
           <ShareButton storyId={story.id} />
-        </View>
-        <Text style={styles.content}>{story.content}</Text>
+        </Box>
+        <Text {...contentStyles}>{story.content}</Text>
       </Animated.ScrollView>
 
-      <View style={styles.imageContainer}>
+      <Box {...imageContainerStyles}>
         <Animated.Image
           source={{ uri: images[currentImageIndex] }}
-          style={[styles.image, { opacity: fadeAnim }]}
+          style={[imageStyles as Record<string, string>, { opacity: fadeAnim }]}
         />
         <LinearGradient
           colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
-          style={styles.gradientOverlay}
+          style={gradientOverlayStyles as Record<string, string | number>}
         />
-      </View>
-    </View>
+      </Box>
+    </Box>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 32,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContainer: {
-    paddingBottom: 250,
-  },
-  title: {
-    fontSize: 42,
-    textAlign: 'left',
-    fontFamily: 'MontserratBold',
-  },
-  content: {
-    marginTop: 16,
-    fontSize: 16,
-    lineHeight: 28,
-    fontFamily: 'MontserratRegular',
-  },
-  imageContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 250,
-  },
-  gradientOverlay: {
-    position: 'absolute',
-    bottom: 250,
-    left: 0,
-    right: 0,
-    height: 80,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  divider: {
-    width: 96,
-    height: 8,
-    backgroundColor: 'black',
-  },
-});
+const containerStyles = {
+  flex: 1,
+  bg: '$white',
+  p: '$8',
+};
+
+const scrollView = {
+  flex: 1,
+};
+
+const scrollContainerStyles = {
+  pb: '$64',
+};
+
+const titleStyles = {
+  fontSize: '$xl',
+  textAlign: 'left',
+  fontFamily: 'MontserratBold',
+};
+
+const dividerStyles = {
+  h: '1px',
+  w: '24',
+  bg: '$black',
+};
+
+const buttonsContainerStyles = {
+  alignItems: 'flex-start',
+  flexDirection: 'row',
+};
+
+const contentStyles = {
+  mt: '$4',
+  fontSize: '$md',
+  lineHeight: '$7',
+  fontFamily: 'MontserratRegular',
+};
+
+const imageContainerStyles = {
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  height: 250,
+};
+
+const imageStyles = {
+  width: '100%',
+  height: '100%',
+  resizeMode: 'cover',
+};
+
+const gradientOverlayStyles = {
+  position: 'absolute',
+  bottom: 250,
+  left: 0,
+  right: 0,
+  height: '$20',
+};
 
 export default StoryDetails;

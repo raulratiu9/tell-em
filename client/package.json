@@ -26,6 +26,7 @@
     "@gluestack-ui/icon": "^0.1.25",
     "@gluestack-ui/nativewind-utils": "^1.0.26",
     "@gluestack-ui/overlay": "^0.1.16",
+    "@gluestack-ui/themed": "^1.1.65",
     "@gluestack-ui/toast": "^1.0.8",
     "@react-native-community/blur": "^4.4.1",
     "@react-navigation/native": "^7.0.14",
