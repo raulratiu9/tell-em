@@ -5,9 +5,20 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "com.raulratiu9.client",
+    "platforms": ["android", "ios"],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "build": {
+      "development": {
+        "developmentClient": true,
+        "distribution": "internal"
+      },
+      "preview": {
+        "distribution": "internal"
+      },
+      "production": {}
+    },
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -15,6 +26,9 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.raulratiu9.client",
+      "resourceClass": "m-medium",
+      "simulator": true,
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
         "CFBundleLocalizations": ["fr"]
@@ -24,7 +38,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.raulratiu9.client"
     },
     "web": {
       "bundler": "metro",
@@ -39,10 +54,25 @@
           "publishableKey": "pk_test_51IpqXiB0DBWINfoejTnkhdl4zlyDSzKXkHTsext3xemBzZJZ8ZHI2xhwCeUV0GEyFcYKhwC1dR1wDg61CeUpyQ1S00XTZSdZeZ",
           "merchantIdentifier": "merchant.com.fullstackstripeapp"
         }
-      ]
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.950669092745-f39ot63p65bk5ch7ic45vdiq2p0cfnic"
+        }
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "7b8ee01b-ad6b-43e7-a833-60bf32e96bb6"
+      }
     }
   }
 }

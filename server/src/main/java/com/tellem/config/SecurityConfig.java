@@ -75,7 +75,7 @@ public class SecurityConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        var registeredClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("").clientSecret("").scope(OidcScopes.OPENID).scope(OidcScopes.PROFILE).redirectUri("")
+        var registeredClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("fdggdfgdf").clientSecret("gfdgfdgfdgfd").scope(OidcScopes.OPENID).scope(OidcScopes.PROFILE).redirectUri("fsdfdsfsdfsd")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)

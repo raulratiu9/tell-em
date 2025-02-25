@@ -8,7 +8,7 @@ export const getStories = async (setter: (param: Story[]) => void) => {
       {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${process.env.EXPO_PUBLIC_AUTH_TOKEN}`,
+          // Authorization: `Bearer ${process.env.EXPO_PUBLIC_AUTH_TOKEN}`,
         },
       },
     );
