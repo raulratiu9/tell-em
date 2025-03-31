@@ -1,7 +1,7 @@
 # Tell 'em
 
-## A mix of storytelling and crowdfunding combined in one app
+## A branching storytelling app that can drive you through an immersive experience
 
-### Proudly made in Romania with Java Spring Boot, React Native, Expo and PostgreSQL
+## Also a final thesis research about how easily you can integrate a graph structure into a React Native app by comparing PostgreSQL, MongoDB, Neo4j
 
-TO BE UPDATED
+### Proudly made in Romania with Java Spring Boot, React Native, Expo and PostgreSQL/MongoDB/Neo4j
