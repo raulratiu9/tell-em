@@ -1,8 +1,21 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+### IntelliJ IDEA ###
+server/.idea
+*.iws
+*.iml
+*.ipr
+
+### VS Code ###
+client/.vscode/
+
+### Server ###
+
+server/HELP.md
+server/target/
+!server/.mvn/wrapper/maven-wrapper.jar
+!**server/src/main/**/target/
+!**server/src/test/**/target/
+server/logs/
+server/*.log
 
 ### STS ###
 .apt_generated
@@ -13,22 +26,49 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
 ### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+server/nbproject/private/
+server/nbbuild/
+server/dist/
+server/nbdist/
+server/.nb-gradle/
+serverbuild/
+!**server/src/main/**/build/
+!**server/src/test/**/build/
 
-### VS Code ###
-.vscode/
-env.example
+### Client ###
+client/node_modules/
+client/android/
+
+# Expo
+client/.expo/
+client/dist/
+client/web-build/
+client/expo-env.d.ts
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+client/.metro-health-check*
+
+# debug
+client/npm-debug.*
+client/yarn-debug.*
+client/yarn-error.*
+
+# macOS
+client/.DS_Store
+client/*.pem
+
+# local env files
+client/.env*.local
+client/.env
+
+# typescript
+client/*.tsbuildinfo
