@@ -30,6 +30,7 @@ server/*.log
 server/nbproject/private/
 server/nbbuild/
 server/dist/
+server/out/
 server/nbdist/
 server/.nb-gradle/
 serverbuild/
