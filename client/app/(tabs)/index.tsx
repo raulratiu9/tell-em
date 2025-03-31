@@ -1,59 +1,110 @@
 import { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, Text, View, Button, Image } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { Story } from '@/types';
-import StoryCard from '@/components/StoryCard';
-import { router } from 'expo-router';
-import { getStories } from '@/api/getStories';
+WebBrowser.maybeCompleteAuthSession();
 
-export default function StoriesFeed() {
-  const [stories, setStories] = useState<Story[]>([]);
+export default function App() {
+  const [token, setToken] = useState('');
+  const [userInfo, setUserInfo] = useState(null);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  });
 
   useEffect(() => {
-    getStories(setStories);
-  }, []);
+    handleEffect();
+  }, [response, token]);
+
+  async function handleEffect() {
+    const user = await getLocalUser();
+    console.log('user', user);
+    if (!user) {
+      if (response?.type === 'success') {
+        setToken(response.authentication.accessToken);
+        getUserInfo(response?.authentication.accessToken);
+      }
+    } else {
+      setUserInfo(user);
+      console.log('loaded locally');
+    }
+  }
+
+  const getLocalUser = async () => {
+    const data = await AsyncStorage.getItem('@user');
+    if (!data) return null;
+    return JSON.parse(data);
+  };
+
+  const getUserInfo = async (token) => {
+    if (!token) return;
+    try {
+      const response = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const user = await response.json();
+      await AsyncStorage.setItem('@user', JSON.stringify(user));
+      setUserInfo(user);
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+    }
+  };
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <View style={styles.container}>
-        <Text style={styles.header}>Tell'em you've got new stories</Text>
-        <FlatList
-          data={stories}
-          keyExtractor={(item: Story) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              key={item.title}
-              onPress={() => router.push(`/story/${item.id}`)}
-            >
-              <StoryCard key={item.title} story={item} />
-            </TouchableOpacity>
-          )}
+    <View style={styles.container}>
+      {!userInfo ? (
+        <Button
+          title="Sign in with Google"
+          disabled={!request}
+          onPress={() => {
+            setTimeout(() => promptAsync(), 1000);
+          }}
         />
-      </View>
-    </ScrollView>
+      ) : (
+        <View style={styles.card}>
+          {userInfo?.picture && (
+            <Image source={{ uri: userInfo?.picture }} style={styles.image} />
+          )}
+          <Text style={styles.text}>Email: {userInfo.email}</Text>
+          <Text style={styles.text}>
+            Verified: {userInfo.verified_email ? 'yes' : 'no'}
+          </Text>
+          <Text style={styles.text}>Name: {userInfo.name}</Text>
+          <Text style={styles.text}>{JSON.stringify(userInfo, null, 2)}</Text>
+        </View>
+      )}
+      <Button
+        title="remove local store"
+        onPress={async () => await AsyncStorage.removeItem('@user')}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
+    backgroundColor: '#fff',
+    alignItems: 'center',
     justifyContent: 'center',
-    fontFamily: 'MontserratBlack',
-    overflowX: 'hidden',
   },
-  header: {
-    fontSize: 24,
+  text: {
+    fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 60,
-    marginBottom: 40,
-    textAlign: 'left',
+  },
+  card: {
+    borderWidth: 1,
+    borderRadius: 15,
+    padding: 15,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
 });

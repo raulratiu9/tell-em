@@ -1,16 +1,14 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { router, Tabs } from 'expo-router';
+import { Link, Tabs } from 'expo-router';
+import { Pressable } from 'react-native';
 
 import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { useClientOnlyValue } from '@/hooks/useClientOnlyValue';
-import { ComponentProps } from 'react';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { Text, TouchableOpacity, View } from 'react-native';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useColorScheme } from '@/components/useColorScheme';
+import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
+// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
-  name: ComponentProps<typeof FontAwesome>['name'];
+  name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
 }) {
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
@@ -23,40 +21,37 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        // Disable the static render of the header on web
+        // to prevent a hydration error in React Navigation v6.
         headerShown: useClientOnlyValue(false, true),
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Stories',
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <FontAwesome5
-              name="pen-nib"
-              size={28}
-              style={{ marginBottom: -3 }}
-              color={color}
-            />
+          title: 'Tab One',
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          headerRight: () => (
+            <Link href="/modal" asChild>
+              <Pressable>
+                {({ pressed }) => (
+                  <FontAwesome
+                    name="info-circle"
+                    size={25}
+                    color={Colors[colorScheme ?? 'light'].text}
+                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                  />
+                )}
+              </Pressable>
+            </Link>
           ),
         }}
       />
       <Tabs.Screen
-        name="add-story"
+        name="two"
         options={{
-          title: 'Add story',
-          tabBarIcon: ({ color }) => <TabBarIcon name="plus-circle" color={color} />,
-          headerLeft: () => (
-            <View>
-              <TouchableOpacity
-                onPress={() => router.push('/')}
-                style={{ flexDirection: 'row', alignItems: 'center' }}
-              >
-                <MaterialIcons name="arrow-back-ios" size={24} color="black" />
-                <Text style={{ fontFamily: '', color: 'black' }}>Back</Text>
-              </TouchableOpacity>
-            </View>
-          ),
+          title: 'Tab Two',
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
     </Tabs>

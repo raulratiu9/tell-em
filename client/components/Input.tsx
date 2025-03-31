@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, TextInput, StyleSheet, TextInputProps } from 'react-native';
 
 interface InputProps extends TextInputProps {

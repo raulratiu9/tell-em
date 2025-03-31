@@ -2,9 +2,8 @@ import { Link, Stack } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import { ReactNode } from 'react';
 
-export default function NotFoundScreen({ children }: { children: ReactNode }) {
+export default function NotFoundScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
@@ -15,7 +14,6 @@ export default function NotFoundScreen({ children }: { children: ReactNode }) {
           <Text style={styles.linkText}>Go to home screen!</Text>
         </Link>
       </View>
-      <View>{children}</View>
     </>
   );
 }

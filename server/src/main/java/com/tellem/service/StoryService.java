@@ -5,7 +5,6 @@ import com.tellem.repository.StoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class StoryService {
@@ -20,7 +19,7 @@ public class StoryService {
     }
 
     public Story getStoryById(Long id) {
-        if(id == null) {
+        if (id == null) {
             throw new IllegalArgumentException("No ID provided");
         } else {
             return storyRepository.findById(id).orElse(null);
