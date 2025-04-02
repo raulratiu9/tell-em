@@ -1,37 +1,30 @@
 package com.tellem.model;
 
-import com.tellem.repository.UserRepository;
-import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Entity
-@Table(name = "stories")
+@Node("Story")
 @Data
 public class Story {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
+    @Property("title")
     private String title;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
-
-    private String image;
-
-    @ManyToOne
-    @JoinColumn(name = "author_id")
+    @Property("description")
+    private String description;
+    @Property("featureImage")
+    private String featureImage;
+    @Relationship(type = "WRITTEN_BY", direction = Relationship.Direction.OUTGOING)
     private User author;
 
-    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public void setAuthorId(String authorId, UserRepository userRepository) {
-        User user = userRepository.findById(Long.valueOf(authorId)).orElse(null);
-        this.author = user;
-    }
-
+    @Relationship(type = "HAS_FRAME", direction = Relationship.Direction.OUTGOING)
+    private List<Frame> frames;
 }

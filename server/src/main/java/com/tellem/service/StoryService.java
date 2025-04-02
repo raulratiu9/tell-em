@@ -3,8 +3,8 @@ package com.tellem.service;
 import com.tellem.model.Story;
 import com.tellem.repository.StoryRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class StoryService {
@@ -14,19 +14,11 @@ public class StoryService {
         this.storyRepository = storyRepository;
     }
 
-    public List<Story> getAllStories() {
+    public Flux<Story> getAllStories() {
         return storyRepository.findAll();
     }
 
-    public Story getStoryById(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("No ID provided");
-        } else {
-            return storyRepository.findById(id).orElse(null);
-        }
-    }
-
-    public Story saveStory(Story story) {
-        return storyRepository.save(story);
+    public Mono<Story> getStoryByTitle(String title) {
+        return storyRepository.findByTitle(title);
     }
 }
