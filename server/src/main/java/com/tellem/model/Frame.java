@@ -1,31 +1,26 @@
 package com.tellem.model;
 
-import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "frames")
+@Node("Frame")
 @Data
 public class Frame {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String frameKey;
-
-    @Column(length = 300)
+    @Property("title")
+    private String title;
+    @Property("content")
     private String content;
-
+    @Property("image")
     private String image;
 
-    @ManyToOne
-    @JoinColumn(name = "story_id")
-    private Story story;
-
-    @OneToMany(mappedBy = "frame", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Choice> choices = new ArrayList<>();
+    @Relationship(type = "GOES_ON", direction = Relationship.Direction.OUTGOING)
+    private List<Frame> nextFrames;
 }
+

@@ -1,61 +1,30 @@
 package com.tellem.model;
 
-import com.tellem.model.dto.StoryRequest;
-import com.tellem.repository.FrameRepository;
-import com.tellem.repository.UserRepository;
-import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@Table(name = "stories")
+@Node("Story")
 @Data
 public class Story {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Property("title")
     private String title;
-
+    @Property("description")
     private String description;
-
+    @Property("featureImage")
     private String featureImage;
-
-    @ManyToOne
-    @JoinColumn(name = "author_id")
+    @Relationship(type = "WRITTEN_BY", direction = Relationship.Direction.OUTGOING)
     private User author;
 
-    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
-    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Relationship(type = "HAS_FRAME", direction = Relationship.Direction.OUTGOING)
     private List<Frame> frames;
-
-    public void setAuthorId(String authorId, UserRepository userRepository) {
-        User user = userRepository.findById(authorId);
-        this.author = user;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-
-    public void setContent(String content) {
-    }
-
-    public void setFrames(List<StoryRequest.FrameRequest> frames, FrameRepository frameRepository) {
-    }
 }
