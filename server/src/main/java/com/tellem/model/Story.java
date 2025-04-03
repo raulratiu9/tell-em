@@ -1,37 +1,21 @@
 package com.tellem.model;
 
-import com.tellem.repository.UserRepository;
-import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
-@Entity
-@Table(name = "stories")
+@Document(collection = "stories")
 @Data
 public class Story {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
+    @Field("story_id")
+    private String id;
     private String title;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
-
-    private String image;
-
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    private User author;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    public void setAuthorId(String authorId, UserRepository userRepository) {
-        User user = userRepository.findById(Long.valueOf(authorId)).orElse(null);
-        this.author = user;
-    }
-
+    private String description;
+    private String featureImage;
+    @Field("frames")
+    private List<Frame> frames;
 }
