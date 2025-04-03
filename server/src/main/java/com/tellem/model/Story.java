@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "stories")
@@ -14,13 +15,11 @@ public class Story {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
+    private String description;
 
-    private String image;
+    private String featureImage;
 
     @ManyToOne
     @JoinColumn(name = "author_id")
@@ -28,6 +27,12 @@ public class Story {
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Frame> frames;
 
     public void setAuthorId(String authorId, UserRepository userRepository) {
         User user = userRepository.findById(Long.valueOf(authorId)).orElse(null);

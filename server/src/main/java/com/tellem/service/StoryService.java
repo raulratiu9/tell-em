@@ -1,5 +1,6 @@
 package com.tellem.service;
 
+import com.tellem.exception.StoryNotFoundException;
 import com.tellem.model.Story;
 import com.tellem.repository.StoryRepository;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,10 @@ public class StoryService {
     public Story getStoryById(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("No ID provided");
-        } else {
-            return storyRepository.findById(id).orElse(null);
         }
+
+        return storyRepository.findById(id)
+                .orElseThrow(() -> new StoryNotFoundException("Story not found with id " + id));
     }
 
     public Story saveStory(Story story) {
