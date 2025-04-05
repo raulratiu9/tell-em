@@ -11,13 +11,14 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import StoryCard from '@/components/StoryCard';
 import Toast from 'react-native-toast-message';
-import { Story } from '@/types';
+import { Frame, Story } from '@/types';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { router } from 'expo-router';
 import postStory from '@/api/postStory';
 import Input from '@/components/Input';
-import Button from '@/components/Button';
+import Button from '@/components/common/Button';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import StoryMap from '@/components/add-story/StoryMap';
 
 export default function AddStory() {
   const [story, setStory] = useState({
@@ -123,10 +124,56 @@ export default function AddStory() {
     image: image?.uri,
   };
 
+  const mockFrames: Frame[] = [
+    {
+      id: 1,
+      content: 'You wake up in a mysterious forest.',
+      image:
+        'https://images.pexels.com/photos/31295481/pexels-photo-31295481/free-photo-of-scenic-autumn-view-of-kiyomizu-dera-in-kyoto-japan.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      storyId: 1,
+      choices: [
+        { id: 1, name: 'Go left', frameId: 2 },
+        { id: 2, name: 'Go right', frameId: 3 },
+      ],
+    },
+    {
+      id: 2,
+      content: 'You encounter a river.',
+      image:
+        'https://images.pexels.com/photos/9330653/pexels-photo-9330653.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      storyId: 1,
+      choices: [],
+    },
+    {
+      id: 3,
+      content: 'You see a bear in the distance.',
+      image:
+        'https://images.pexels.com/photos/26955592/pexels-photo-26955592/free-photo-of-a-river-runs-through-a-grassy-field.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      storyId: 1,
+      choices: [],
+    },
+    {
+      id: 4,
+      content: 'You find a hidden cabin. Is this the end?',
+      image:
+        'https://images.pexels.com/photos/31152265/pexels-photo-31152265/free-photo-of-autumn-leaves-and-rocky-mountain-landscape.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      storyId: 1,
+      choices: [],
+    },
+  ];
+  if (true) {
+    return (
+      <View style={styles.container}>
+        <StoryMap frames={mockFrames} />;
+      </View>
+    );
+  }
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
+          <StoryMap frames={mockFrames} />
           <Text style={styles.header}>Tell'em what you've done</Text>
           <Input
             placeholder="Title"
@@ -164,7 +211,7 @@ export default function AddStory() {
               />
             </TouchableOpacity>
           ) : (
-            <React.Fragment>
+            <>
               <View style={styles.previewInfo}>
                 <FontAwesome5 name="info-circle" size={24} color="white" />
                 <Text
@@ -179,7 +226,7 @@ export default function AddStory() {
                 </Text>
               </View>
               <StoryCard story={storyPreview as Story} isPreview />
-            </React.Fragment>
+            </>
           )}
           <Button title="Tell 'em" onPress={handleSubmit} disabled={!image} />
         </View>

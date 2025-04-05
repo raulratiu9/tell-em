@@ -15,8 +15,8 @@ public class Frame {
     @Column(name = "frame_id")
     private Long id;
 
-    private String title;
     private String content;
+    
     private String image;
 
     @ManyToOne

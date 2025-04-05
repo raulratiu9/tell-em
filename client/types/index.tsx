@@ -9,3 +9,17 @@ export interface Story {
   content: string;
   image: string;
 }
+
+export interface Frame {
+  id: number;
+  content: string;
+  image: string;
+  storyId: number;
+  choices: Choice[];
+}
+
+export interface Choice {
+  id: number;
+  name: string;
+  frameId: number;
+}
