@@ -1,5 +1,7 @@
 package com.tellem.model;
 
+import com.tellem.model.dto.StoryRequest;
+import com.tellem.repository.FrameRepository;
 import com.tellem.repository.UserRepository;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -31,12 +33,29 @@ public class Story {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Frame> frames;
 
     public void setAuthorId(String authorId, UserRepository userRepository) {
-        User user = userRepository.findById(Long.valueOf(authorId)).orElse(null);
+        User user = userRepository.findById(authorId);
         this.author = user;
     }
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+
+    public void setContent(String content) {
+    }
+
+    public void setFrames(List<StoryRequest.FrameRequest> frames, FrameRepository frameRepository) {
+    }
 }

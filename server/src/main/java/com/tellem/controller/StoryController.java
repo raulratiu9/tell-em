@@ -1,27 +1,95 @@
 package com.tellem.controller;
 
+import com.tellem.model.Choice;
+import com.tellem.model.Frame;
 import com.tellem.model.Story;
+import com.tellem.model.dto.StoryRequest;
+import com.tellem.repository.ChoiceRepository;
+import com.tellem.repository.FrameRepository;
 import com.tellem.repository.UserRepository;
 import com.tellem.service.StoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/stories")
 public class StoryController {
 
     private final StoryService storyService;
-    private final UserRepository userRepository; // Inject the UserRepository
+    private final UserRepository userRepository;
+    private final FrameRepository frameRepository;
+    private final ChoiceRepository choiceRepository;
 
-    public StoryController(StoryService storyService, UserRepository userRepository) {
+    public StoryController(StoryService storyService, UserRepository userRepository, FrameRepository frameRepository, ChoiceRepository choiceRepository) {
         this.storyService = storyService;
         this.userRepository = userRepository;
+        this.frameRepository = frameRepository;
+        this.choiceRepository = choiceRepository;
+    }
+
+    @PostMapping
+    public ResponseEntity<String> createStory(@RequestBody StoryRequest storyRequest) {
+        if (storyRequest.getTitle().isEmpty() || storyRequest.getDescription().isEmpty() || storyRequest.getAuthorId().isEmpty()) {
+            return new ResponseEntity<>("Title, content, and author are required", HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            Story story = new Story();
+            story.setTitle(storyRequest.getTitle());
+            story.setDescription(storyRequest.getDescription());
+            story.setAuthorId(storyRequest.getAuthorId(), userRepository);
+            story.setFeatureImage(storyRequest.getFeatureImage());
+
+            Story savedStory = storyService.saveStory(story);
+
+            Map<String, Frame> frameMap = new HashMap<>();
+
+            for (StoryRequest.FrameRequest frameRequest : storyRequest.getFrames()) {
+                Frame frame = new Frame();
+                frame.setContent(frameRequest.getContent());
+                frame.setImage(frameRequest.getImage());
+                frame.setFrameKey(frameRequest.getFrameKey());
+                frame.setStory(savedStory);
+                Frame savedFrame = frameRepository.save(frame);
+                frameMap.put(frameRequest.getFrameKey(), savedFrame);
+            }
+
+            for (StoryRequest.FrameRequest frameRequest : storyRequest.getFrames()) {
+                Frame currentFrame = frameMap.get(frameRequest.getFrameKey());
+                if (frameRequest.getChoices() != null) {
+                    for (StoryRequest.ChoiceRequest choiceRequest : frameRequest.getChoices()) {
+                        Choice choice = new Choice();
+                        choice.setName(choiceRequest.getName());
+                        choice.setFrame(currentFrame);
+
+                        choiceRepository.save(choice);
+
+                        if (choiceRequest.getNextFrameKey() != null) {
+                            Frame nextFrame = frameMap.get(choiceRequest.getNextFrameKey());
+                            if (nextFrame != null) {
+
+                                Choice nextChoice = new Choice();
+                                nextChoice.setName("Go to next frame: " + nextFrame.getFrameKey());
+                                nextChoice.setFrame(currentFrame);
+                                choiceRepository.save(nextChoice);
+
+                                currentFrame.getChoices().add(nextChoice);
+                            }
+                        }
+                    }
+                }
+                frameRepository.save(currentFrame);
+            }
+
+            return new ResponseEntity<>(savedStory.getId().toString(), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("An error occurred while creating the story: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping
@@ -33,66 +101,6 @@ public class StoryController {
     @GetMapping("/{id}")
     public ResponseEntity<Story> getStoryById(@PathVariable long id) {
         Story story = storyService.getStoryById(id);
-        return new ResponseEntity(story, HttpStatus.OK);
+        return new ResponseEntity<>(story, HttpStatus.OK);
     }
 }
-
-//    @PostMapping
-//    public ResponseEntity<String> createStory(
-//            @RequestParam("title") String title,
-//            @RequestParam("content") String content,
-//            @RequestParam("image") MultipartFile image,
-//            @RequestParam("author_id") String authorId) {
-//
-//        try {
-//            Story story = new Story();
-//
-//            // Handle file upload
-//            if (image != null && !image.isEmpty()) {
-//                System.out.println("Image received: " + image.getOriginalFilename());
-//                String imagePath = saveImage(image);
-//                story.setImage(imagePath);
-//                System.out.println("Image saved at: " + imagePath);
-//            } else {
-//                System.out.println("No image provided");
-//            }
-//
-//            // Set the author based on author_id
-//            story.setTitle(title);
-//            story.setContent(content);
-//            story.setAuthorId(authorId, userRepository); // Set the author using the new method
-//
-//            Story savedStory = storyService.saveStory(story);
-//
-//            return new ResponseEntity(savedStory.getId().toString(), HttpStatus.CREATED);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return new ResponseEntity("Error", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-//
-//    // Save image to local file system
-//    private String saveImage(MultipartFile image) throws IOException {
-//        // Create the uploads directory if it doesn't exist
-//        String uploadDir = "src/main/resources/static";
-//        File uploadDirFile = new File(uploadDir);
-//        if (!uploadDirFile.exists()) {
-//            uploadDirFile.mkdirs();
-//        }
-//
-//        // Get the original file name
-//        String originalFileName = image.getOriginalFilename();
-//        if (originalFileName != null) {
-//            // Generate a unique name for the file
-//            String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName;
-//            Path path = Paths.get(uploadDir + File.separator + uniqueFileName);
-//
-//            // Save the file to the disk
-//            Files.copy(image.getInputStream(), path);
-//
-//            return uniqueFileName;  // Return the file path
-//        } else {
-//            throw new IOException("File name is invalid.");
-//        }
-//    }
-//}
