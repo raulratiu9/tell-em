@@ -13,6 +13,7 @@ import java.util.List;
 
 @Service
 public class StoryService {
+
     private final StoryRepository storyRepository;
     private final FrameRepository frameRepository;
     private final ChoiceRepository choiceRepository;
@@ -25,31 +26,36 @@ public class StoryService {
 
     @Transactional
     public Story saveStory(Story story) {
+        // Save the story first so it has an ID
         Story savedStory = storyRepository.save(story);
 
         if (story.getFrames() != null && !story.getFrames().isEmpty()) {
             for (Frame frame : story.getFrames()) {
+                // Link the frame to the saved story (ensure the frame knows the saved story ID)
                 frame.setStory(savedStory);
 
+                // Save the frame so it gets an ID (MongoDB needs this to create references)
+                Frame savedFrame = frameRepository.save(frame);
+
+                // After saving the frame, save the choices that refer to this frame
                 if (frame.getChoices() != null && !frame.getChoices().isEmpty()) {
                     for (Choice choice : frame.getChoices()) {
-                        choice.setFrame(frame);
-                        choiceRepository.save(choice);
+                        // Ensure the choice references the saved frame
+                        choice.setFrame(savedFrame);
+                        choiceRepository.save(choice);  // Save the choice
                     }
                 }
-
-                frameRepository.save(frame);
             }
         }
 
-        return savedStory;
+        return savedStory;  // Return the saved story
     }
 
     public List<Story> getAllStories() {
         return storyRepository.findAll();
     }
 
-    public Story getStoryById(Long id) {
+    public Story getStoryById(String id) {
         return storyRepository.findById(id).orElse(null);
     }
 }

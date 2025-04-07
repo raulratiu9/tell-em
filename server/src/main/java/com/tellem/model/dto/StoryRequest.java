@@ -24,6 +24,11 @@ public class StoryRequest {
     public static class ChoiceRequest {
         private String name;
         private String nextFrameKey;
+        private String image;
+
+        public String getImage() {
+            return image;
+        }
     }
 }
 
