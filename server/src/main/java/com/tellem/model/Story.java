@@ -1,68 +1,72 @@
 package com.tellem.model;
 
-import com.tellem.model.dto.StoryRequest;
-import com.tellem.repository.FrameRepository;
 import com.tellem.repository.UserRepository;
-import jakarta.persistence.*;
-import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@Table(name = "stories")
-@Data
+@Document(collection = "stories")
 public class Story {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private String id;
     private String title;
-
     private String description;
-
+    private String authorId;
     private String featureImage;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    private User author;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
-    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
+    @DBRef
     private List<Frame> frames;
 
-    @ManyToOne
-    @JoinColumn(name = "first_frame_id")
-    private Frame firstFrame;
+    // Getter and Setter for frames
+    public List<Frame> getFrames() {
+        return frames;
+    }
+
+    public void setFrames(List<Frame> frames) {
+        this.frames = frames;
+    }
+
+    // Getter and Setter for other fields (title, description, etc.)
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getAuthorId() {
+        return authorId;
+    }
 
     public void setAuthorId(String authorId, UserRepository userRepository) {
-        User user = userRepository.findById(authorId);
-        this.author = user;
+        this.authorId = authorId;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+    public String getFeatureImage() {
+        return featureImage;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-
-    public void setContent(String content) {
-    }
-
-    public void setFrames(List<StoryRequest.FrameRequest> frames, FrameRepository frameRepository) {
-    }
-
-    public void setFirstFrame(Frame firstFrame) {
+    public void setFeatureImage(String featureImage) {
+        this.featureImage = featureImage;
     }
 }
