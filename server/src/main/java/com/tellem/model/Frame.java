@@ -7,20 +7,21 @@ import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.util.List;
+import java.util.UUID;
 
 @Node("Frame")
 @Data
 public class Frame {
     @Id
-    private Long id;
-    @Property("title")
-    private String title;
+    private UUID frameId;
+
     @Property("content")
     private String content;
+
     @Property("image")
     private String image;
-
-    @Relationship(type = "GOES_ON", direction = Relationship.Direction.OUTGOING)
-    private List<Frame> nextFrames;
+    
+    @Relationship(type = "LEADS_TO", direction = Relationship.Direction.OUTGOING)
+    private List<Choice> nextFrames;
 }
 

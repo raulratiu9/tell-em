@@ -1,13 +1,10 @@
 package com.tellem.controller;
 
-import com.tellem.model.Choice;
-import com.tellem.model.Frame;
 import com.tellem.model.Story;
+import com.tellem.model.dto.StoryDto;
 import com.tellem.service.StoryService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +15,12 @@ public class StoryController {
 
     public StoryController(StoryService storyService) {
         this.storyService = storyService;
+    }
+
+    @PostMapping
+    public ResponseEntity<Story> createStoryFromJson(@RequestBody StoryDto input) {
+        Story story = storyService.createGraphFromInput(input);
+        return ResponseEntity.ok(story);
     }
 
     @GetMapping

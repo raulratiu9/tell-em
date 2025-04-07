@@ -4,7 +4,6 @@ import com.tellem.model.Frame;
 import com.tellem.repository.FrameRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Service
 public class FrameService {
@@ -16,9 +15,5 @@ public class FrameService {
 
     public Flux<Frame> getAllFrames() {
         return frameRepository.findAll();
-    }
-
-    public Mono<Frame> getFrameByTitle(String title) {
-        return frameRepository.findByTitle(title);
     }
 }

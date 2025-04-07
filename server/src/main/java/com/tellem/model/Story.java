@@ -8,12 +8,13 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Node("Story")
 @Data
 public class Story {
     @Id
-    private Long id;
+    private UUID storyId;
     @Property("title")
     private String title;
     @Property("description")
