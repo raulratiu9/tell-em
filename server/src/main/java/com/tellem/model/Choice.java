@@ -16,6 +16,8 @@ public class Choice {
 
     private String image;
 
+    private String nextFrameId;
+
     @ManyToOne
     @JoinColumn(name = "frame_id", nullable = false)
     private Frame frame;

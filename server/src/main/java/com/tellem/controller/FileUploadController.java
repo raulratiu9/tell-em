@@ -26,15 +26,14 @@ public class FileUploadController {
 
         for (MultipartFile file : files) {
             try {
-                // Încărcăm fiecare fișier și adăugăm URL-ul la lista de URL-uri
+
                 String fileUrl = s3Service.uploadFile(file);
                 fileUrls.add(fileUrl);
             } catch (IOException e) {
-                return ResponseEntity.status(500).body(List.of("Eroare la încărcarea fișierului: " + e.getMessage()));
+                return ResponseEntity.status(500).body(List.of("Error encountered: " + e.getMessage()));
             }
         }
 
-        // Returnează lista de URL-uri pentru fișierele încărcate
         return ResponseEntity.ok(fileUrls);
     }
 }
