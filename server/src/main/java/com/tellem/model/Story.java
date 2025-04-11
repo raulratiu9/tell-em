@@ -26,6 +26,6 @@ public class Story {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Relationship(type = "HAS_FRAME", direction = Relationship.Direction.OUTGOING)
+    @Relationship(type = "LEADS_TO", direction = Relationship.Direction.OUTGOING)
     private List<Frame> frames;
 }

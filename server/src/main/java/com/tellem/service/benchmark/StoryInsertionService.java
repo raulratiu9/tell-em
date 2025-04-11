@@ -1,9 +1,7 @@
 package com.tellem.service.benchmark;
 
-import com.tellem.model.Choice;
 import com.tellem.model.Frame;
 import com.tellem.model.Story;
-import com.tellem.repository.ChoiceRepository;
 import com.tellem.repository.FrameRepository;
 import com.tellem.repository.StoryRepository;
 import com.tellem.service.CSVLoggerService;
@@ -16,16 +14,13 @@ import java.util.List;
 public class StoryInsertionService implements StoryBuilderInterface {
     private final StoryRepository storyRepository;
     private final FrameRepository frameRepository;
-    private final ChoiceRepository choiceRepository;
 
     public StoryInsertionService(
             StoryRepository storyRepository,
-            FrameRepository frameRepository,
-            ChoiceRepository choiceRepository
+            FrameRepository frameRepository
     ) {
         this.storyRepository = storyRepository;
         this.frameRepository = frameRepository;
-        this.choiceRepository = choiceRepository;
     }
 
 
@@ -35,7 +30,7 @@ public class StoryInsertionService implements StoryBuilderInterface {
         story.setTitle(title);
         story.setDescription(description);
         story.setFeatureImage(image);
-        return storyRepository.save(story);
+        return storyRepository.save(story).block();
     }
 
     @Override
@@ -43,19 +38,7 @@ public class StoryInsertionService implements StoryBuilderInterface {
         Frame frame = new Frame();
         frame.setContent("This is a test node. Node " + index);
         frame.setImage("image.png");
-        frame.setStory(story);
-        frame.setFrameKey("frameKey" + index);
-        return frameRepository.save(frame);
-    }
-
-    @Override
-    public Choice createChoice(Frame fromFrame, Frame toFrame) {
-        Choice choice = new Choice();
-        choice.setName("Choice to frame " + toFrame.getFrameKey());
-        choice.setImage("image.png");
-        choice.setNextFrameId(String.valueOf(toFrame.getId()));
-        choice.setFrame(fromFrame);
-        return choiceRepository.save(choice);
+        return frameRepository.save(frame).block();
     }
 
     @Override
@@ -78,7 +61,6 @@ public class StoryInsertionService implements StoryBuilderInterface {
     public void createChoicesBetweenFrames(List<Frame> frames) {
         for (int i = 0; i < frames.size() - 1; i++) {
             long start = System.currentTimeMillis();
-            createChoice(frames.get(i), frames.get(i + 1));
             long end = System.currentTimeMillis();
 
             CSVLoggerService.log("POSTGRESQL", "insert_decision", i, end - start);

@@ -8,7 +8,6 @@ import com.tellem.service.BenchmarkService;
 import com.tellem.service.benchmark.BenchmarkUtils;
 import com.tellem.service.benchmark.StoryInsertionService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,7 +22,6 @@ public class InsertStories implements BenchmarkService {
     }
 
     @Override
-    @Transactional
     public BenchmarkResponseDto runBenchmark(int numberOfItems) {
         long startStoryTime = System.currentTimeMillis();
 
