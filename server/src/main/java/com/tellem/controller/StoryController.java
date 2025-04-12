@@ -6,7 +6,6 @@ import com.tellem.service.StoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/stories")
@@ -29,7 +28,7 @@ public class StoryController {
     }
 
     @GetMapping("/{title}")
-    public Mono<Story> getStoryByTitle(@PathVariable String title) {
+    public Flux<Story> getStoryByTitle(@PathVariable String title) {
         return storyService.getStoryByTitle(title);
     }
 }

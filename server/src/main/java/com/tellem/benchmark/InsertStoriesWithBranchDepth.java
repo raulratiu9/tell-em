@@ -8,16 +8,16 @@ import com.tellem.service.BenchmarkService;
 import com.tellem.service.StoryService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
-public class InsertStoriesWithNodes implements BenchmarkService {
+public class InsertStoriesWithBranchDepth implements BenchmarkService {
 
     private final StoryService storyService;
+    private int maxDepth = 2;
+    private int branchFactor = 2;
 
-    public InsertStoriesWithNodes(StoryService storyService) {
+    public InsertStoriesWithBranchDepth(StoryService storyService) {
         this.storyService = storyService;
     }
 
@@ -29,6 +29,7 @@ public class InsertStoriesWithNodes implements BenchmarkService {
         int totalNodes = 0;
         long nodeEnd = 0;
         long memoryAfterNode = 0;
+
         for (int i = 0; i < numberOfStories; i++) {
             StoryDto storyDto = generateStoryDto(i, numberOfNodes);
             nodeStart = System.currentTimeMillis();
@@ -37,11 +38,10 @@ public class InsertStoriesWithNodes implements BenchmarkService {
             storyService.createGraphFromInput(storyDto);
             nodeEnd = System.currentTimeMillis();
             memoryAfterNode = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-
         }
+
         long totalTimeForNodes = nodeEnd - nodeStart;
         double avgTimePerNode = (double) totalTimeForNodes / totalNodes;
-
 
         long endTime = System.currentTimeMillis();
         long memoryAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -63,48 +63,64 @@ public class InsertStoriesWithNodes implements BenchmarkService {
         storyDto.setDescription("Description " + index);
         storyDto.setFeatureImage("image" + index + ".png");
 
-        List<FrameDto> frames = new ArrayList<>();
+        List<FrameDto> allFrames = new ArrayList<>();
+        Queue<FrameDto> queue = new LinkedList<>();
 
-        // Creează toate frame-urile
-        for (int i = 0; i < numberOfNodes; i++) {
-            FrameDto frame = new FrameDto();
-            frame.setFrameId(UUID.randomUUID());
-            frame.setContent("Content " + UUID.randomUUID() + i);
-            frame.setImage("image" + (i % 10) + ".png");
-            frame.setNextFrames(new ArrayList<>());
-            frames.add(frame);
-        }
+        // 1. Creăm primul nod
+        FrameDto root = createFrame(0);
+        allFrames.add(root);
+        queue.add(root);
+        int created = 1;
 
-        int i = 0;
-        while (i < numberOfNodes - 1) {
-            FrameDto current = frames.get(i);
+        // 2. Generăm pe ramuri
+        while (created < numberOfNodes && !queue.isEmpty()) {
+            FrameDto current = queue.poll();
 
-            if (i % 5 == 0 && i + 4 < numberOfNodes) {
-                // ramificare: F_i → [F_i+1, F_i+2], continuări liniare
-                FrameDto branch1 = frames.get(i + 1);
-                FrameDto branch2 = frames.get(i + 2);
-                FrameDto continue1 = frames.get(i + 3);
-                FrameDto continue2 = frames.get(i + 4);
+            // Ramificăm în 2
+            int branches = Math.min(2, numberOfNodes - created);
+            List<FrameDto> nextFrames = new ArrayList<>();
 
-                current.setNextFrames(List.of(branch1, branch2));
-                branch1.setNextFrames(List.of(continue1));
-                branch2.setNextFrames(List.of(continue2));
+            for (int b = 0; b < branches; b++) {
+                FrameDto child = createFrame(created++);
+                nextFrames.add(child);
+                queue.add(child);
+                allFrames.add(child);
 
-                i += 1; // mergem la următorul nod liber (nu sărim peste tot)
-            } else {
-                // legătură simplă
-                current.setNextFrames(List.of(frames.get(i + 1)));
-                i += 1;
+                // Continuăm ramura pe adâncime 1-2 dacă mai avem loc
+                int depth = Math.min(2, numberOfNodes - created);
+                FrameDto prev = child;
+                for (int d = 0; d < depth; d++) {
+                    FrameDto deep = createFrame(created++);
+                    prev.setNextFrames(List.of(deep));
+                    prev = deep;
+                    queue.add(deep);
+                    allFrames.add(deep);
+                }
             }
+
+            current.setNextFrames(nextFrames);
         }
 
-        storyDto.setFrames(frames);
+        storyDto.setFrames(allFrames);
         return storyDto;
     }
 
+    private FrameDto createFrame(int i) {
+        FrameDto frame = new FrameDto();
+        frame.setFrameId(UUID.randomUUID());
+        frame.setContent("Content " + UUID.randomUUID() + i);
+        frame.setImage("image" + (i % 10) + ".png");
+        frame.setNextFrames(new ArrayList<>());
+        return frame;
+    }
 
     @Override
     public BenchmarkResponseDto runBenchmark(int numberOfItems) {
         return null;
+    }
+
+    public void setConfig(int maxDepth, int branchFactor) {
+        this.maxDepth = maxDepth;
+        this.branchFactor = branchFactor;
     }
 }
