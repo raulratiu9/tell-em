@@ -10,6 +10,7 @@ public class FrameDto {
     private UUID frameId;
     private String content;
     private String image;
-    private List<FrameDto> nextFrames;
+    private List<UUID> nextFrameIds;
 }
+
 

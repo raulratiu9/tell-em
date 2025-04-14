@@ -1,54 +1,59 @@
 package com.tellem.controller;
 
-import com.tellem.benchmark.InsertStoriesWithBranchDepth;
-import com.tellem.benchmark.InsertStoriesWithNodes;
-import com.tellem.model.dto.BenchmarkResponseDto;
+import com.tellem.benchmark.InsertBranchingStories;
+import com.tellem.benchmark.InsertLiniarStories;
+import com.tellem.benchmark.TraverseStory;
 import com.tellem.model.dto.MultipleBenchmarkDto;
-import com.tellem.service.BenchmarkService;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.tellem.model.dto.TraversalBenchmarkDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/benchmark")
 public class BenchmarkController {
 
-    private final BenchmarkService insertStoriesService;
-    private final InsertStoriesWithNodes insertStoriesWithNodesService;
-    private final InsertStoriesWithBranchDepth insertStoriesWithBranchDepth;
+    private final InsertLiniarStories insertLiniarStoriesService;
+    private final InsertBranchingStories insertBranchingStories;
+    private final TraverseStory traverseStory;
 
     public BenchmarkController(
-            @Qualifier("insertStories") BenchmarkService insertStoriesService, InsertStoriesWithNodes insertStoriesWithNodesService, InsertStoriesWithBranchDepth insertStoriesWithBranchDepth) {
-        this.insertStoriesService = insertStoriesService;
-        this.insertStoriesWithNodesService = insertStoriesWithNodesService;
-        this.insertStoriesWithBranchDepth = insertStoriesWithBranchDepth;
+            InsertLiniarStories insertLiniarStoriesService, InsertBranchingStories insertBranchingStories, TraverseStory traverseStory) {
+        this.insertLiniarStoriesService = insertLiniarStoriesService;
+        this.insertBranchingStories = insertBranchingStories;
+        this.traverseStory = traverseStory;
     }
 
-    @GetMapping("/stories-with-nodes")
+    @GetMapping("/liniar-stories")
     public ResponseEntity<MultipleBenchmarkDto> run(@RequestParam int numberOfStories,
                                                     @RequestParam int numberOfNodes) {
-        MultipleBenchmarkDto benchmarkResponse = insertStoriesWithNodesService.runMultipleBenchmarks(numberOfStories, numberOfNodes);
+        MultipleBenchmarkDto benchmarkResponse = insertLiniarStoriesService.generate(numberOfStories, numberOfNodes);
 
         return ResponseEntity.ok(benchmarkResponse);
     }
 
-    @GetMapping("/stories-with-branch-depth")
+    @GetMapping("/branching-stories")
     public ResponseEntity<MultipleBenchmarkDto> runWithBranchDepth(
             @RequestParam int numberOfStories,
             @RequestParam int numberOfNodes,
-            @RequestParam(defaultValue = "100") int maxDepth,
-            @RequestParam(defaultValue = "100") int branchFactor) {
+            @RequestParam(defaultValue = "100") int storyDepth,
+            @RequestParam(defaultValue = "100") int branchingFactor) {
 
-        insertStoriesWithBranchDepth.setConfig(maxDepth, branchFactor);
+        insertBranchingStories.setConfig(storyDepth, branchingFactor);
         MultipleBenchmarkDto benchmarkResponse =
-                insertStoriesWithBranchDepth.runMultipleBenchmarks(numberOfStories, numberOfNodes);
+                insertBranchingStories.generate(numberOfStories, numberOfNodes);
 
         return ResponseEntity.ok(benchmarkResponse);
     }
 
-    @GetMapping({"/stories/{number}", "/nodes/{number}"})
-    public ResponseEntity<BenchmarkResponseDto> run(@PathVariable int number) {
-        BenchmarkResponseDto benchmarkResponse = insertStoriesService.runBenchmark(number);
-        return ResponseEntity.ok(benchmarkResponse);
+    @GetMapping("/traverse/{storyId}")
+    public ResponseEntity<TraversalBenchmarkDto> runTraversalBenchmark(@PathVariable UUID storyId) {
+
+        TraversalBenchmarkDto result = traverseStory.traverse(storyId);
+        if (result.getErrorMessage() != null) {
+            return ResponseEntity.badRequest().body(result);
+        }
+        return ResponseEntity.ok(result);
     }
 }

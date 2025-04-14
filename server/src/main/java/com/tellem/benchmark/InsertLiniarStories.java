@@ -1,10 +1,8 @@
 package com.tellem.benchmark;
 
-import com.tellem.model.dto.BenchmarkResponseDto;
 import com.tellem.model.dto.FrameDto;
 import com.tellem.model.dto.MultipleBenchmarkDto;
 import com.tellem.model.dto.StoryDto;
-import com.tellem.service.BenchmarkService;
 import com.tellem.service.StoryService;
 import org.springframework.stereotype.Service;
 
@@ -13,16 +11,15 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class InsertStoriesWithNodes implements BenchmarkService {
+public class InsertLiniarStories {
 
     private final StoryService storyService;
 
-    public InsertStoriesWithNodes(StoryService storyService) {
+    public InsertLiniarStories(StoryService storyService) {
         this.storyService = storyService;
     }
 
-    @Override
-    public MultipleBenchmarkDto runMultipleBenchmarks(int numberOfStories, int numberOfNodes) {
+    public MultipleBenchmarkDto generate(int numberOfStories, int numberOfNodes) {
         long startTime = System.currentTimeMillis();
         long memoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long nodeStart = 0;
@@ -59,52 +56,31 @@ public class InsertStoriesWithNodes implements BenchmarkService {
 
     private StoryDto generateStoryDto(int index, int numberOfNodes) {
         StoryDto storyDto = new StoryDto();
-        storyDto.setTitle("Story " + UUID.randomUUID() + index);
+        storyDto.setTitle("Story " + UUID.randomUUID() + "-" + index);
         storyDto.setDescription("Description " + index);
         storyDto.setFeatureImage("image" + index + ".png");
 
         List<FrameDto> frames = new ArrayList<>();
 
-        // Creează toate frame-urile
         for (int i = 0; i < numberOfNodes; i++) {
             FrameDto frame = new FrameDto();
             frame.setFrameId(UUID.randomUUID());
-            frame.setContent("Content " + UUID.randomUUID() + i);
+            frame.setContent("Content " + frame.getFrameId());
             frame.setImage("image" + (i % 10) + ".png");
-            frame.setNextFrames(new ArrayList<>());
+            frame.setNextFrameIds(new ArrayList<>());
             frames.add(frame);
         }
 
-        int i = 0;
-        while (i < numberOfNodes - 1) {
+        for (int i = 0; i < numberOfNodes - 1; i++) {
             FrameDto current = frames.get(i);
-
-            if (i % 5 == 0 && i + 4 < numberOfNodes) {
-                // ramificare: F_i → [F_i+1, F_i+2], continuări liniare
-                FrameDto branch1 = frames.get(i + 1);
-                FrameDto branch2 = frames.get(i + 2);
-                FrameDto continue1 = frames.get(i + 3);
-                FrameDto continue2 = frames.get(i + 4);
-
-                current.setNextFrames(List.of(branch1, branch2));
-                branch1.setNextFrames(List.of(continue1));
-                branch2.setNextFrames(List.of(continue2));
-
-                i += 1; // mergem la următorul nod liber (nu sărim peste tot)
-            } else {
-                // legătură simplă
-                current.setNextFrames(List.of(frames.get(i + 1)));
-                i += 1;
-            }
+            FrameDto next = frames.get(i + 1);
+            current.getNextFrameIds().add(next.getFrameId());
         }
 
         storyDto.setFrames(frames);
+        storyDto.setFirstFrameId(frames.get(0).getFrameId());
+
         return storyDto;
     }
 
-
-    @Override
-    public BenchmarkResponseDto runBenchmark(int numberOfItems) {
-        return null;
-    }
 }
