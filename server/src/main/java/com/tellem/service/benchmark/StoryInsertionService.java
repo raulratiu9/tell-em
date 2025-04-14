@@ -53,7 +53,7 @@ public class StoryInsertionService implements StoryBuilderInterface {
         Choice choice = new Choice();
         choice.setName("Choice to frame " + toFrame.getFrameKey());
         choice.setImage("image.png");
-        choice.setNextFrameId(String.valueOf(toFrame.getId()));
+        choice.setNextFrameId((toFrame.getId()));
         choice.setFrame(fromFrame);
         return choiceRepository.save(choice);
     }

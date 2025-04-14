@@ -2,9 +2,7 @@ package com.tellem.benchmark;
 
 import com.tellem.model.Frame;
 import com.tellem.model.Story;
-import com.tellem.model.dto.BenchmarkResponseDto;
 import com.tellem.model.dto.MultipleBenchmarkDto;
-import com.tellem.service.BenchmarkService;
 import com.tellem.service.benchmark.StoryInsertionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,17 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class InsertStoriesWithNodes implements BenchmarkService {
+public class InsertLiniarStories {
 
     private final StoryInsertionService storyInsertionService;
 
-    public InsertStoriesWithNodes(StoryInsertionService storyInsertionService) {
+    public InsertLiniarStories(StoryInsertionService storyInsertionService) {
         this.storyInsertionService = storyInsertionService;
     }
 
-    @Override
     @Transactional
-    public MultipleBenchmarkDto runMultipleBenchmarks(int numberOfStories, int numberOfNodes) {
+    public MultipleBenchmarkDto generate(int numberOfStories, int numberOfNodes) {
         long startStoryTime = System.currentTimeMillis();
         long totalMemoryBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long totalMemoryAfter;
@@ -57,10 +54,5 @@ public class InsertStoriesWithNodes implements BenchmarkService {
 
         return new MultipleBenchmarkDto(numberOfStories, totalTimeForStories, averageTimePerStory, memoryUsedForStories,
                 numberOfNodes, totalTimeForNodes, averageTimePerNode, memoryUsedForNodes);
-    }
-
-    @Override
-    public BenchmarkResponseDto runBenchmark(int numberOfItems) {
-        return null;
     }
 }

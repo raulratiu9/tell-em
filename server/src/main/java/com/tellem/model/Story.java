@@ -36,6 +36,10 @@ public class Story {
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Frame> frames;
 
+    @ManyToOne
+    @JoinColumn(name = "first_frame_id")
+    private Frame firstFrame;
+
     public void setAuthorId(String authorId, UserRepository userRepository) {
         User user = userRepository.findById(authorId);
         this.author = user;
@@ -57,5 +61,8 @@ public class Story {
     }
 
     public void setFrames(List<StoryRequest.FrameRequest> frames, FrameRepository frameRepository) {
+    }
+
+    public void setFirstFrame(Frame firstFrame) {
     }
 }
