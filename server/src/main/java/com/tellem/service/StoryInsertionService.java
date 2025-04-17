@@ -45,10 +45,9 @@ public class StoryInsertionService {
 
     public Frame createFrame(int index, Story story) {
         Frame frame = new Frame();
-        frame.setContent(TextGeneratorUtils.generateFrameContent(index));
+        frame.setContent(TextGeneratorUtils.generateFrameContent(String.valueOf(index)));
         frame.setImage("https://tell-em-bucket.s3.eu-central-1.amazonaws.com/artistic_mountains_moon_bird_trees_forest_purple_starry_sky_vaporwave_hd_vaporwave.jpg");
-        frame.setStory(story);
-        frame.setChoices(new ArrayList<>());
+        frame.setStoryId(story.getId());
         return frameRepository.save(frame);
     }
 
@@ -58,7 +57,6 @@ public class StoryInsertionService {
         choice.setName(TextGeneratorUtils.generateChoiceText(fromFrame.getId()));
         choice.setImage("https://tell-em-bucket.s3.eu-central-1.amazonaws.com/purple_retro_wave_artistic_palm_trees_synthwave_moon_minimalism_vaporwave_4k_hd_vaporwave-2560x1440.jpg");
         choice.setNextFrameId((toFrame.getId()));
-        choice.setFrame(fromFrame);
         return choiceRepository.save(choice);
     }
 
@@ -87,4 +85,3 @@ public class StoryInsertionService {
         }
     }
 }
-

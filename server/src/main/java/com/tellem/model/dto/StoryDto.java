@@ -6,11 +6,11 @@ import java.util.List;
 
 @Data
 public class StoryDto {
-    private Long id;
+    private String id;
     private String title;
     private String description;
     private String featureImage;
-    private Long firstFrameId;
+    private String firstFrameId;
     private List<FrameDto> frames;
 }
 

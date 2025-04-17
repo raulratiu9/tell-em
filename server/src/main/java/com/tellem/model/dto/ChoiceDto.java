@@ -6,6 +6,6 @@ import lombok.Data;
 public class ChoiceDto {
     private String name;
     private String image;
-    private Long nextFrameId;
+    private String nextFrameId;
 }
 

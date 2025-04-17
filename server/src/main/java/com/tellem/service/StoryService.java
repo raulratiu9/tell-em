@@ -10,8 +10,6 @@ import com.tellem.model.dto.StoryDto;
 import com.tellem.repository.ChoiceRepository;
 import com.tellem.repository.FrameRepository;
 import com.tellem.repository.StoryRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,21 +40,7 @@ public class StoryService {
                 .toList();
     }
 
-    public List<StoryDto> getPaginatedStories(Pageable pageable) {
-        return storyRepository.findAll(pageable)
-                .stream()
-                .map(this::mapToDto)
-                .toList();
-    }
-
-    public List<StoryDto> searchStories(String query, Pageable pageable) {
-        Page<Story> page = storyRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                query, query, pageable
-        );
-        return page.stream().map(this::mapToDto).toList();
-    }
-
-    public StoryDto getStoryById(Long id) {
+    public StoryDto getStoryById(String id) {
         Story story = storyRepository.findById(id)
                 .orElseThrow(() -> new StoryNotFoundException(id));
         return mapToDto(story);
@@ -66,7 +50,7 @@ public class StoryService {
     public Story saveStory(StoryDto storyDto) {
         validateStoryDto(storyDto);
         Story story = createAndSaveStory(storyDto);
-        Map<Long, Frame> savedFrames = saveFrames(storyDto, story);
+        Map<String, Frame> savedFrames = saveFrames(storyDto, story);
         saveChoices(storyDto, savedFrames);
         linkFramesToStory(storyDto, story, savedFrames);
         return storyRepository.save(story);
@@ -82,15 +66,15 @@ public class StoryService {
         return storyRepository.save(story);
     }
 
-    private Map<Long, Frame> saveFrames(StoryDto storyDto, Story story) {
-        Map<Long, Frame> savedFrames = new HashMap<>();
+    private Map<String, Frame> saveFrames(StoryDto storyDto, Story story) {
+        Map<String, Frame> savedFrames = new HashMap<>();
 
         for (FrameDto frameDto : storyDto.getFrames()) {
             Frame frame = new Frame();
             frame.setId(frameDto.getFrameId());
             frame.setContent(frameDto.getContent());
             frame.setImage(frameDto.getImage());
-            frame.setStory(story);
+            frame.setStoryId(story.getId());
             frame = frameRepository.save(frame);
 
             savedFrames.put(frame.getId(), frame);
@@ -98,7 +82,7 @@ public class StoryService {
         return savedFrames;
     }
 
-    private void saveChoices(StoryDto storyDto, Map<Long, Frame> savedFrames) {
+    private void saveChoices(StoryDto storyDto, Map<String, Frame> savedFrames) {
         for (FrameDto frameDto : storyDto.getFrames()) {
             Frame parentFrame = savedFrames.get(frameDto.getFrameId());
             List<Choice> savedChoices = new ArrayList<>();
@@ -116,7 +100,7 @@ public class StoryService {
         }
     }
 
-    private void linkFramesToStory(StoryDto storyDto, Story story, Map<Long, Frame> savedFrames) {
+    private void linkFramesToStory(StoryDto storyDto, Story story, Map<String, Frame> savedFrames) {
         Frame firstFrame = savedFrames.get(storyDto.getFirstFrameId());
         story.setFirstFrame(firstFrame);
         story.setFrames(new ArrayList<>(savedFrames.values()));
@@ -169,7 +153,8 @@ public class StoryService {
                 })
                 .toList();
     }
-}
 
+    public List<StoryDto> getPaginatedStories(Pageable pageable) { return storyRepository.findAll(pageable) .stream() .map(this::mapToDto) .toList(); } public List<StoryDto> searchStories(String query, Pageable pageable) { Page<Story> page = storyRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase( query, query, pageable ); return page.stream().map(this::mapToDto).toList(); }
+}
 
 
