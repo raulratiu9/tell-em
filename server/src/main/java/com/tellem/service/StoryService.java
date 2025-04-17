@@ -1,5 +1,6 @@
 package com.tellem.service;
 
+import com.tellem.exception.StoryNotFoundException;
 import com.tellem.model.Choice;
 import com.tellem.model.Frame;
 import com.tellem.model.Story;
@@ -18,6 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.tellem.utils.StoryValidationUtils.validateStory;
+import static com.tellem.utils.StoryValidationUtils.validateStoryDto;
+
 @Service
 public class StoryService {
     private final StoryRepository storyRepository;
@@ -30,27 +34,55 @@ public class StoryService {
         this.choiceRepository = choiceRepository;
     }
 
+    public List<StoryDto> getAllStories() {
+        return storyRepository.findAll().stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    public StoryDto getStoryById(String id) {
+        Story story = storyRepository.findById(id)
+                .orElseThrow(() -> new StoryNotFoundException(id));
+        return mapToDto(story);
+    }
+
     @Transactional
     public Story saveStory(StoryDto storyDto) {
+        validateStoryDto(storyDto);
+        Story story = createAndSaveStory(storyDto);
+        Map<String, Frame> savedFrames = saveFrames(storyDto, story);
+        saveChoices(storyDto, savedFrames);
+        linkFramesToStory(storyDto, story, savedFrames);
+        return storyRepository.save(story);
+    }
+
+    private Story createAndSaveStory(StoryDto storyDto) {
         Story story = new Story();
         story.setTitle(storyDto.getTitle());
         story.setDescription(storyDto.getDescription());
         story.setFeatureImage(storyDto.getFeatureImage());
         story.setCreatedAt(LocalDateTime.now());
-        story = storyRepository.save(story);
 
+        return storyRepository.save(story);
+    }
+
+    private Map<String, Frame> saveFrames(StoryDto storyDto, Story story) {
         Map<String, Frame> savedFrames = new HashMap<>();
+
         for (FrameDto frameDto : storyDto.getFrames()) {
             Frame frame = new Frame();
             frame.setId(frameDto.getFrameId());
             frame.setContent(frameDto.getContent());
             frame.setImage(frameDto.getImage());
             frame.setStoryId(story.getId());
-
             frame = frameRepository.save(frame);
+
             savedFrames.put(frame.getId(), frame);
         }
+        return savedFrames;
+    }
 
+    private void saveChoices(StoryDto storyDto, Map<String, Frame> savedFrames) {
         for (FrameDto frameDto : storyDto.getFrames()) {
             Frame parentFrame = savedFrames.get(frameDto.getFrameId());
             List<Choice> savedChoices = new ArrayList<>();
@@ -60,37 +92,23 @@ public class StoryService {
                 choice.setName(choiceDto.getName());
                 choice.setImage(choiceDto.getImage());
                 choice.setNextFrameId(choiceDto.getNextFrameId());
-                choice.setCurrentFrameId(parentFrame.getId());
-
                 savedChoices.add(choiceRepository.save(choice));
             }
 
             parentFrame.setChoices(savedChoices);
             frameRepository.save(parentFrame);
         }
+    }
 
+    private void linkFramesToStory(StoryDto storyDto, Story story, Map<String, Frame> savedFrames) {
         Frame firstFrame = savedFrames.get(storyDto.getFirstFrameId());
         story.setFirstFrame(firstFrame);
         story.setFrames(new ArrayList<>(savedFrames.values()));
-
-        return storyRepository.save(story);
     }
-
-
-    public List<StoryDto> getAllStories() {
-        return storyRepository.findAll().stream()
-                .map(this::mapToDto)
-                .toList();
-    }
-
-    public StoryDto getStoryById(Long id) {
-        Story story = storyRepository.findById(String.valueOf(id)).orElse(null);
-        return mapToDto(story);
-    }
-
 
     private StoryDto mapToDto(Story story) {
-        System.out.print(story);
+        validateStory(story);
+
         StoryDto dto = new StoryDto();
         dto.setId(story.getId());
         dto.setTitle(story.getTitle());
@@ -101,33 +119,39 @@ public class StoryService {
             dto.setFirstFrameId(story.getFirstFrame().getId());
         }
 
-        List<FrameDto> frameDtos = new ArrayList<>();
-
-        if (story.getFrames() != null) {
-            frameDtos = story.getFrames().stream().map(frame -> {
-                FrameDto frameDto = new FrameDto();
-                frameDto.setFrameId(frame.getId());
-                frameDto.setContent(frame.getContent());
-                frameDto.setImage(frame.getImage());
-
-                List<ChoiceDto> choiceDtos = new ArrayList<>();
-                if (frame.getChoices() != null) {
-                    choiceDtos = frame.getChoices().stream().map(choice -> {
-                        ChoiceDto choiceDto = new ChoiceDto();
-                        choiceDto.setName(choice.getName());
-                        choiceDto.setImage(choice.getImage());
-                        choiceDto.setNextFrameId(choice.getNextFrameId());
-                        return choiceDto;
-                    }).toList();
-                }
-
-                frameDto.setChoices(choiceDtos);
-                return frameDto;
-            }).toList();
-        }
-
-        dto.setFrames(frameDtos);
+        dto.setFrames(mapFrames(story.getFrames()));
         return dto;
+    }
+
+    private List<FrameDto> mapFrames(List<Frame> frames) {
+        if (frames == null) return new ArrayList<>();
+
+        return frames.stream()
+                .map(this::mapFrame)
+                .toList();
+    }
+
+    private FrameDto mapFrame(Frame frame) {
+        FrameDto frameDto = new FrameDto();
+        frameDto.setFrameId(frame.getId());
+        frameDto.setContent(frame.getContent());
+        frameDto.setImage(frame.getImage());
+        frameDto.setChoices(mapChoices(frame.getChoices()));
+        return frameDto;
+    }
+
+    private List<ChoiceDto> mapChoices(List<Choice> choices) {
+        if (choices == null) return new ArrayList<>();
+
+        return choices.stream()
+                .map(choice -> {
+                    ChoiceDto dto = new ChoiceDto();
+                    dto.setName(choice.getName());
+                    dto.setImage(choice.getImage());
+                    dto.setNextFrameId(choice.getNextFrameId());
+                    return dto;
+                })
+                .toList();
     }
 }
 

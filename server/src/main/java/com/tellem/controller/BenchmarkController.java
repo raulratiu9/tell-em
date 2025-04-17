@@ -1,7 +1,7 @@
 package com.tellem.controller;
 
 import com.tellem.benchmark.InsertBranchingStories;
-import com.tellem.benchmark.InsertLiniarStories;
+import com.tellem.benchmark.InsertLinearStories;
 import com.tellem.model.dto.MultipleBenchmarkDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/benchmark")
 public class BenchmarkController {
 
-    private final InsertLiniarStories insertLiniarStories;
+    private final InsertLinearStories insertLinearStories;
     private final InsertBranchingStories insertBranchingStories;
 
     public BenchmarkController(
-            InsertLiniarStories insertLiniarStories, InsertBranchingStories insertBranchingStories) {
-        this.insertLiniarStories = insertLiniarStories;
+            InsertLinearStories insertLinearStories, InsertBranchingStories insertBranchingStories) {
+        this.insertLinearStories = insertLinearStories;
         this.insertBranchingStories = insertBranchingStories;
     }
 
-    @GetMapping("/liniar-stories")
+    @GetMapping("/linear-stories")
     public ResponseEntity<MultipleBenchmarkDto> run(@RequestParam int numberOfStories,
                                                     @RequestParam int numberOfNodes) {
-        MultipleBenchmarkDto benchmarkResponse = insertLiniarStories.generate(numberOfStories, numberOfNodes);
+        MultipleBenchmarkDto benchmarkResponse = insertLinearStories.generate(numberOfStories, numberOfNodes);
 
         return ResponseEntity.ok(benchmarkResponse);
     }

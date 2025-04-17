@@ -1,5 +1,6 @@
 package com.tellem.controller;
 
+import com.tellem.exception.InvalidStoryException;
 import com.tellem.model.Story;
 import com.tellem.model.dto.StoryDto;
 import com.tellem.service.StoryService;
@@ -8,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static com.tellem.utils.StoryValidationUtils.isNullOrEmpty;
 
 @RestController
 @RequestMapping("/api/stories")
@@ -20,29 +23,29 @@ public class StoryController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createStory(@RequestBody StoryDto storyRequest) {
-        if (storyRequest.getTitle().isEmpty() || storyRequest.getDescription().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> createStory(@RequestBody StoryDto storyRequest) {
+        if (isNullOrEmpty(storyRequest.getTitle()) || isNullOrEmpty(storyRequest.getDescription())) {
+            return ResponseEntity.badRequest().body("Title and description are required.");
         }
 
         try {
             Story savedStory = storyService.saveStory(storyRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedStory.getId());
+        } catch (InvalidStoryException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save story.");
         }
     }
 
-
     @GetMapping
     public ResponseEntity<List<StoryDto>> getAllStories() {
-        List<StoryDto> stories = storyService.getAllStories();
-        return new ResponseEntity<>(stories, HttpStatus.OK);
+        return ResponseEntity.ok(storyService.getAllStories());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StoryDto> getStoryById(@PathVariable long id) {
+    public ResponseEntity<StoryDto> getStoryById(@PathVariable String id) {
         StoryDto story = storyService.getStoryById(id);
-        return new ResponseEntity<>(story, HttpStatus.OK);
+        return ResponseEntity.ok(story);
     }
 }

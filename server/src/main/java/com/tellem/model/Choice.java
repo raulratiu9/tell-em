@@ -10,6 +10,5 @@ public class Choice {
     private String name;
     private String image;
     private String nextFrameId;
-    private String currentFrameId;
 }
 

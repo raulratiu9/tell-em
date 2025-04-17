@@ -1,13 +1,7 @@
 package com.tellem.exception;
 
 public class StoryNotFoundException extends RuntimeException {
-
-    public StoryNotFoundException(String message) {
-        super(message);
-    }
-    
-    public StoryNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+    public StoryNotFoundException(String id) {
+        super("Story with ID " + id + " was not found.");
     }
 }
-
