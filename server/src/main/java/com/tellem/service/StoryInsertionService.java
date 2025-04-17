@@ -1,4 +1,4 @@
-package com.tellem.service.benchmark;
+package com.tellem.service;
 
 import com.tellem.model.Choice;
 import com.tellem.model.Frame;
@@ -6,14 +6,14 @@ import com.tellem.model.Story;
 import com.tellem.repository.ChoiceRepository;
 import com.tellem.repository.FrameRepository;
 import com.tellem.repository.StoryRepository;
-import com.tellem.service.CSVLoggerService;
+import com.tellem.utils.TextGeneratorUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class StoryInsertionService implements StoryBuilderInterface {
+public class StoryInsertionService {
     private final StoryRepository storyRepository;
     private final FrameRepository frameRepository;
     private final ChoiceRepository choiceRepository;
@@ -29,36 +29,40 @@ public class StoryInsertionService implements StoryBuilderInterface {
     }
 
 
-    @Override
-    public Story createStory(String title, String description, String image) {
+    public Story createStory(String title) {
         Story story = new Story();
         story.setTitle(title);
-        story.setDescription(description);
-        story.setFeatureImage(image);
+        story.setDescription(TextGeneratorUtils.generateStoryDescription(story.getTitle()));
+        story.setFeatureImage("https://tell-em-bucket.s3.eu-central-1.amazonaws.com/artistic_landscape_view_of_mountains_trees_lights_purple_starry_sky_moon_minimalism_4k_hd_minimalism.jpg");
+
         return storyRepository.save(story);
     }
 
-    @Override
+    public Story saveStory(Story story) {
+        return storyRepository.save(story);
+    }
+
+
     public Frame createFrame(int index, Story story) {
         Frame frame = new Frame();
-        frame.setContent("This is a test node. Node " + index);
-        frame.setImage("image.png");
+        frame.setContent(TextGeneratorUtils.generateFrameContent(index));
+        frame.setImage("https://tell-em-bucket.s3.eu-central-1.amazonaws.com/artistic_mountains_moon_bird_trees_forest_purple_starry_sky_vaporwave_hd_vaporwave.jpg");
         frame.setStory(story);
-        frame.setFrameKey("frameKey" + index);
+        frame.setChoices(new ArrayList<>());
         return frameRepository.save(frame);
     }
 
-    @Override
+
     public Choice createChoice(Frame fromFrame, Frame toFrame) {
         Choice choice = new Choice();
-        choice.setName("Choice to frame " + toFrame.getFrameKey());
-        choice.setImage("image.png");
+        choice.setName(TextGeneratorUtils.generateChoiceText(fromFrame.getId()));
+        choice.setImage("https://tell-em-bucket.s3.eu-central-1.amazonaws.com/purple_retro_wave_artistic_palm_trees_synthwave_moon_minimalism_vaporwave_4k_hd_vaporwave-2560x1440.jpg");
         choice.setNextFrameId((toFrame.getId()));
         choice.setFrame(fromFrame);
         return choiceRepository.save(choice);
     }
 
-    @Override
+
     public List<Frame> createFramesForStory(Story story, int frameCount) {
         List<Frame> frames = new ArrayList<>();
         for (int i = 0; i < frameCount; i++) {
@@ -66,22 +70,19 @@ public class StoryInsertionService implements StoryBuilderInterface {
             Frame frame = createFrame(i, story);
             long end = System.currentTimeMillis();
 
-            CSVLoggerService.log("POSTGRESQL", "insert_node", i, end - start);
             System.out.println("Inserted Node " + i + " in " + (end - start) + " ms");
-
             frames.add(frame);
         }
         return frames;
     }
 
-    @Override
+
     public void createChoicesBetweenFrames(List<Frame> frames) {
         for (int i = 0; i < frames.size() - 1; i++) {
             long start = System.currentTimeMillis();
             createChoice(frames.get(i), frames.get(i + 1));
             long end = System.currentTimeMillis();
 
-            CSVLoggerService.log("POSTGRESQL", "insert_decision", i, end - start);
             System.out.println("Inserted decision from frame " + i + " in " + (end - start) + " ms");
         }
     }

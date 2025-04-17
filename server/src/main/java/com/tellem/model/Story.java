@@ -1,8 +1,5 @@
 package com.tellem.model;
 
-import com.tellem.model.dto.StoryRequest;
-import com.tellem.repository.FrameRepository;
-import com.tellem.repository.UserRepository;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -40,11 +37,6 @@ public class Story {
     @JoinColumn(name = "first_frame_id")
     private Frame firstFrame;
 
-    public void setAuthorId(String authorId, UserRepository userRepository) {
-        User user = userRepository.findById(authorId);
-        this.author = user;
-    }
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -54,15 +46,5 @@ public class Story {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-    }
-
-
-    public void setContent(String content) {
-    }
-
-    public void setFrames(List<StoryRequest.FrameRequest> frames, FrameRepository frameRepository) {
-    }
-
-    public void setFirstFrame(Frame firstFrame) {
     }
 }
