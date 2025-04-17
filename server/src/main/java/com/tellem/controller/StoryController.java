@@ -20,7 +20,7 @@ public class StoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> createStory(@RequestBody StoryDto storyRequest) {
+    public ResponseEntity<String> createStory(@RequestBody StoryDto storyRequest) {
         if (storyRequest.getTitle().isEmpty() || storyRequest.getDescription().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }

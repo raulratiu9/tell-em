@@ -6,7 +6,6 @@ import com.tellem.model.Story;
 import com.tellem.repository.ChoiceRepository;
 import com.tellem.repository.FrameRepository;
 import com.tellem.repository.StoryRepository;
-import com.tellem.service.CSVLoggerService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,23 +37,26 @@ public class StoryInsertionService implements StoryBuilderInterface {
         return storyRepository.save(story);
     }
 
+    public Story saveStory(Story story) {
+        return storyRepository.save(story);
+    }
+
     @Override
     public Frame createFrame(int index, Story story) {
         Frame frame = new Frame();
         frame.setContent("This is a test node. Node " + index);
         frame.setImage("image.png");
-        frame.setStory(story);
-        frame.setFrameKey("frameKey" + index);
+        frame.setStoryId(story.getId());
         return frameRepository.save(frame);
     }
 
     @Override
     public Choice createChoice(Frame fromFrame, Frame toFrame) {
         Choice choice = new Choice();
-        choice.setName("Choice to frame " + toFrame.getFrameKey());
+        choice.setName("Choice to frame " + toFrame.getId());
         choice.setImage("image.png");
+        choice.setCurrentFrameId(fromFrame.getId());
         choice.setNextFrameId((toFrame.getId()));
-        choice.setFrame(fromFrame);
         return choiceRepository.save(choice);
     }
 
@@ -66,9 +68,7 @@ public class StoryInsertionService implements StoryBuilderInterface {
             Frame frame = createFrame(i, story);
             long end = System.currentTimeMillis();
 
-            CSVLoggerService.log("POSTGRESQL", "insert_node", i, end - start);
             System.out.println("Inserted Node " + i + " in " + (end - start) + " ms");
-
             frames.add(frame);
         }
         return frames;
@@ -80,8 +80,6 @@ public class StoryInsertionService implements StoryBuilderInterface {
             long start = System.currentTimeMillis();
             createChoice(frames.get(i), frames.get(i + 1));
             long end = System.currentTimeMillis();
-
-            CSVLoggerService.log("POSTGRESQL", "insert_decision", i, end - start);
             System.out.println("Inserted decision from frame " + i + " in " + (end - start) + " ms");
         }
     }

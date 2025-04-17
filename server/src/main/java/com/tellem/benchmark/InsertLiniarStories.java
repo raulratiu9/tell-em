@@ -41,6 +41,9 @@ public class InsertLiniarStories {
             averageTimePerNode = (double) totalTimeForNodes / numberOfNodes;
 
             storyInsertionService.createChoicesBetweenFrames(frames);
+            story.setFrames(frames);
+            story.setFirstFrame(frames.get(0));
+            storyInsertionService.saveStory(story);
         }
 
         long endStoryTime = System.currentTimeMillis();
