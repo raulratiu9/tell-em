@@ -6,7 +6,7 @@ import com.tellem.model.dto.StoryDto;
 
 public class StoryValidationUtils {
     public static void validateStory(Story story) {
-        if (isNullOrEmpty(String.valueOf(story.getId())) ||
+        if (isNullOrEmpty(story.getId()) ||
                 isNullOrEmpty(story.getTitle()) ||
                 isNullOrEmpty(story.getDescription()) ||
                 isNullOrEmpty(story.getFeatureImage())) {

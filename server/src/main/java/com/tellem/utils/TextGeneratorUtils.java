@@ -19,13 +19,13 @@ public class TextGeneratorUtils {
         return generateText(base, 500);
     }
 
-    public static String generateFrameContent(int frameId) {
+    public static String generateFrameContent(String frameId) {
         String base = "Frame " + frameId + ": Lorem ipsum dolor sit amet, consectetur adipiscing elit. ";
 
         return generateText(base, 300);
     }
 
-    public static String generateChoiceText(Long nextFrameId) {
+    public static String generateChoiceText(String nextFrameId) {
         String base = "Choice " + nextFrameId + ": ";
 
         return generateText(base, 100);
