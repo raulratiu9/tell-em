@@ -6,10 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "com.raulratiu9.tell_em",
-    "platforms": [
-      "android",
-      "ios"
-    ],
+    "platforms": ["android", "ios"],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "build": {
@@ -34,9 +31,7 @@
       "simulator": true,
       "infoPlist": {
         "CFBundleAllowMixedLocalizations": true,
-        "CFBundleLocalizations": [
-          "fr"
-        ]
+        "CFBundleLocalizations": ["fr"]
       }
     },
     "android": {
@@ -69,7 +64,8 @@
       "expo-font"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "reactNativeBridge": false
     },
     "extra": {
       "router": {
