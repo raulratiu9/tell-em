@@ -1,12 +1,4 @@
-import {
-  View,
-  Text,
-  Image,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
@@ -18,6 +10,9 @@ import { getStories } from '@/api/getStories';
 import { loadCachedStories, saveCachedStories } from '@/utils/loadCachedStories';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import StoryFeedSkeleton from '@/components/StoryFeedSkeleton';
+import useDebounce from '@/hooks/useDebounce';
+import { getSearchedStories } from '@/api/getSearchedStories';
+import Search from '@/components/Search';
 
 const PAGE_SIZE = 20;
 
@@ -28,6 +23,8 @@ export const navigationOptions = {
 export default function HomePage() {
   const [latestStories, setLatestStories] = useState<Story[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 400);
 
   useEffect(() => {
     loadCachedStories()
@@ -50,21 +47,75 @@ export default function HomePage() {
       enabled: hydrated,
     });
 
+  const {
+    data: searchData,
+    fetchNextPage: fetchNextSearchPage,
+    hasNextPage: hasMoreSearch,
+    isFetchingNextPage: loadingMoreSearch,
+    isRefetching: isRefetchingSearch,
+    refetch: refetchSearch,
+  } = useInfiniteQuery({
+    queryKey: ['search', debouncedSearch],
+    queryFn: ({ pageParam = 0 }) =>
+      getSearchedStories(pageParam, PAGE_SIZE, debouncedSearch),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === PAGE_SIZE ? allPages.length : undefined,
+    initialPageParam: 0,
+    enabled: hydrated && debouncedSearch.length > 0,
+  });
+
   const allStories = data?.pages.flat() ?? [];
+  const showingSearchResults = debouncedSearch.length > 0;
+  const storiesToRender = showingSearchResults
+    ? (searchData?.pages.flat() ?? [])
+    : allStories.slice(10);
 
   useEffect(() => {
     if (allStories.length > 0) {
-      const firstPage = data?.pages[0]?.slice(0, 10) ?? [];
+      const firstPage = data?.pages[0]?.slice(0, 20) ?? [];
       saveCachedStories(firstPage);
       setLatestStories(firstPage);
     }
   }, [data]);
 
+  const getListFooterComponent = () => {
+    if (showingSearchResults && loadingMoreSearch) return <StoryFeedSkeleton />;
+    if (!showingSearchResults && isFetchingNextPage) return <StoryFeedSkeleton />;
+    return null;
+  };
+
+  const handleEndReached = () => {
+    if (showingSearchResults && hasMoreSearch && !loadingMoreSearch) {
+      fetchNextSearchPage();
+    } else if (!showingSearchResults && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  const getListEmptyComponent = () => {
+    if (showingSearchResults && debouncedSearch.length > 0) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>No stories found</Text>
+          <Text style={styles.emptySubtitle}>No results for "{debouncedSearch}"</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyTitle}>No stories available</Text>
+        <Text style={styles.emptySubtitle}>Be the first to share your adventure!</Text>
+      </View>
+    );
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <LatestStoriesCarousel stories={latestStories} />
+      <Search value={searchTerm} onChange={setSearchTerm} />
+      <Text style={styles.ctaTitle}>Tell 'em your story</Text>
       <View style={styles.ctaContainer}>
-        <Text style={styles.ctaTitle}>Tell 'em your story</Text>
         <TouchableOpacity onPress={() => router.push('/add-story')}>
           <Image
             source={require('../../assets/images/add_story_img.png')}
@@ -74,7 +125,7 @@ export default function HomePage() {
       </View>
       <FlatList
         contentContainerStyle={styles.container}
-        data={allStories.slice(10)}
+        data={storiesToRender}
         keyExtractor={(item: Story) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => router.push(`/story/${item.id}`)}>
@@ -82,15 +133,13 @@ export default function HomePage() {
           </TouchableOpacity>
         )}
         ListHeaderComponent={<Text style={styles.header}>Explore more stories</Text>}
-        ListFooterComponent={isFetchingNextPage ? <StoryFeedSkeleton /> : null}
-        onEndReached={() => {
-          if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-        }}
+        ListFooterComponent={getListFooterComponent}
+        onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
-        refreshing={isRefetching}
-        onRefresh={refetch}
+        refreshing={showingSearchResults ? isRefetchingSearch : isRefetching}
+        onRefresh={showingSearchResults ? refetchSearch : refetch}
         ListEmptyComponent={
-          !isFetchingNextPage && !isRefetching ? <Text>No stories</Text> : null
+          !isFetchingNextPage && !isRefetching ? getListEmptyComponent() : null
         }
       />
     </View>
@@ -114,17 +163,14 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   ctaContainer: {
-    height: 220,
-    marginVertical: 32,
-    borderBottomEndRadius: 196,
-    borderBottomStartRadius: 196,
+    height: 230,
     overflow: 'hidden',
     position: 'relative',
     padding: 0,
   },
   ctaTitle: {
     fontSize: 22,
-    marginBottom: 12,
+    marginTop: 28,
     marginHorizontal: 24,
     fontFamily: 'MontserratBold',
   },
@@ -132,5 +178,22 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
+    transform: [{ translateY: -50 }],
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    marginTop: 80,
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontFamily: 'MontserratBold',
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    fontFamily: 'MontserratRegular',
+    color: '#666',
+    textAlign: 'center',
   },
 });

@@ -46,6 +46,17 @@ public class StoryController {
         return ResponseEntity.ok(storyService.getAllStories());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<StoryDto>> searchStories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam String query
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        List<StoryDto> results = storyService.searchStories(query, pageable);
+        return ResponseEntity.ok(results);
+    }
+
     @GetMapping
     public ResponseEntity<List<StoryDto>> getPaginatedStories(
             @RequestParam(defaultValue = "0") int page,
