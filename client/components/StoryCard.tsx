@@ -10,14 +10,14 @@ interface Props {
 const MAX_CONTENT_CHARS_ALLOWED = 75;
 
 export default function StoryCard({ story, isPreview }: Props) {
-  const { title, content, image } = story;
+  const { title, description, featureImage } = story;
 
   return (
     <View>
       <View style={styles.imageContainer}>
         <Image
           source={{
-            uri: isPreview ? image : `${process.env.EXPO_PUBLIC_BASE_API_URL}${image}`,
+            uri: isPreview ? featureImage : featureImage,
           }}
           style={styles.image}
         />
@@ -29,7 +29,7 @@ export default function StoryCard({ story, isPreview }: Props) {
       <View style={styles.container}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.content}>
-          {content.slice(0, MAX_CONTENT_CHARS_ALLOWED)}...
+          {description?.slice(0, MAX_CONTENT_CHARS_ALLOWED)}...
         </Text>
       </View>
     </View>

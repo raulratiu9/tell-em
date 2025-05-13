@@ -6,8 +6,8 @@ export interface RootStackParamList {
 export interface Story {
   id: number;
   title: string;
-  content: string;
-  image: string;
+  description: string;
+  featureImage: string;
 }
 
 export interface Frame {

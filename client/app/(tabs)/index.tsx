@@ -1,110 +1,95 @@
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { Story } from '@/types';
+import StoryCard from '@/components/StoryCard';
+import { getStories } from '@/api/getStories';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Button, Image } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { loadCachedStories, saveCachedStories } from '@/utils/loadCachedStories';
 
-WebBrowser.maybeCompleteAuthSession();
+const PAGE_SIZE = 10;
+
+export const navigationOptions = {
+  headerShown: false,
+};
 
 export default function App() {
-  const [token, setToken] = useState('');
-  const [userInfo, setUserInfo] = useState(null);
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-  });
+  const [hydratedFromCache, setHydratedFromCache] = useState(false);
 
   useEffect(() => {
-    handleEffect();
-  }, [response, token]);
-
-  async function handleEffect() {
-    const user = await getLocalUser();
-    console.log('user', user);
-    if (!user) {
-      if (response?.type === 'success') {
-        setToken(response.authentication.accessToken);
-        getUserInfo(response?.authentication.accessToken);
+    loadCachedStories().then((cached) => {
+      if (cached.length > 0) {
+        return;
       }
-    } else {
-      setUserInfo(user);
-      console.log('loaded locally');
+      setHydratedFromCache(true);
+    });
+  }, []);
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, isRefetching } =
+    useInfiniteQuery({
+      queryKey: ['stories'],
+      queryFn: ({ pageParam = 0 }) => getStories(pageParam, PAGE_SIZE),
+      getNextPageParam: (lastPage, allPages) =>
+        lastPage.length === PAGE_SIZE ? allPages.length : undefined,
+      initialPageParam: 0,
+      staleTime: 1000 * 60 * 5,
+      enabled: hydratedFromCache,
+    });
+
+  const allStories = data?.pages.flat() ?? [];
+
+  useEffect(() => {
+    if (allStories.length > 0) {
+      const firstStories = data?.pages[0] ?? [];
+      saveCachedStories(firstStories);
     }
-  }
-
-  const getLocalUser = async () => {
-    const data = await AsyncStorage.getItem('@user');
-    if (!data) return null;
-    return JSON.parse(data);
-  };
-
-  const getUserInfo = async (token) => {
-    if (!token) return;
-    try {
-      const response = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const user = await response.json();
-      await AsyncStorage.setItem('@user', JSON.stringify(user));
-      setUserInfo(user);
-    } catch (error) {
-      console.error('Error fetching user info:', error);
-    }
-  };
+  }, [data]);
 
   return (
-    <View style={styles.container}>
-      {!userInfo ? (
-        <Button
-          title="Sign in with Google"
-          disabled={!request}
-          onPress={() => {
-            setTimeout(() => promptAsync(), 1000);
-          }}
-        />
-      ) : (
-        <View style={styles.card}>
-          {userInfo?.picture && (
-            <Image source={{ uri: userInfo?.picture }} style={styles.image} />
-          )}
-          <Text style={styles.text}>Email: {userInfo.email}</Text>
-          <Text style={styles.text}>
-            Verified: {userInfo.verified_email ? 'yes' : 'no'}
-          </Text>
-          <Text style={styles.text}>Name: {userInfo.name}</Text>
-          <Text style={styles.text}>{JSON.stringify(userInfo, null, 2)}</Text>
-        </View>
+    <FlatList
+      contentContainerStyle={styles.container}
+      data={allStories}
+      keyExtractor={(item: Story) => item.id.toString()}
+      renderItem={({ item }) => (
+        <TouchableOpacity onPress={() => router.push(`/story/${item.id}`)}>
+          <StoryCard story={item} />
+        </TouchableOpacity>
       )}
-      <Button
-        title="remove local store"
-        onPress={async () => await AsyncStorage.removeItem('@user')}
-      />
-    </View>
+      ListHeaderComponent={
+        <Text style={styles.header}>Tell'em you've got new stories</Text>
+      }
+      ListFooterComponent={
+        isFetchingNextPage ? <ActivityIndicator size="large" color="#888" /> : null
+      }
+      onEndReached={() => {
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      }}
+      onEndReachedThreshold={0.5}
+      refreshing={isRefetching}
+      onRefresh={refetch}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 80,
   },
-  text: {
-    fontSize: 20,
+  header: {
+    fontSize: 24,
     fontWeight: 'bold',
-  },
-  card: {
-    borderWidth: 1,
-    borderRadius: 15,
-    padding: 15,
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    marginTop: 60,
+    marginBottom: 40,
+    textAlign: 'left',
   },
 });

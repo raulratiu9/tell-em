@@ -10,6 +10,7 @@ import com.tellem.model.dto.StoryDto;
 import com.tellem.repository.ChoiceRepository;
 import com.tellem.repository.FrameRepository;
 import com.tellem.repository.StoryRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,13 @@ public class StoryService {
 
     public List<StoryDto> getAllStories() {
         return storyRepository.findAll().stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    public List<StoryDto> getPaginatedStories(Pageable pageable) {
+        return storyRepository.findAll(pageable)
+                .stream()
                 .map(this::mapToDto)
                 .toList();
     }
