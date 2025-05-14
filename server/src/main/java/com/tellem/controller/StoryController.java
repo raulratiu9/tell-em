@@ -4,6 +4,9 @@ import com.tellem.exception.InvalidStoryException;
 import com.tellem.model.Story;
 import com.tellem.model.dto.StoryDto;
 import com.tellem.service.StoryService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +41,29 @@ public class StoryController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<StoryDto>> getAllStories() {
         return ResponseEntity.ok(storyService.getAllStories());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<StoryDto>> searchStories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam String query
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        List<StoryDto> results = storyService.searchStories(query, pageable);
+        return ResponseEntity.ok(results);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<StoryDto>> getPaginatedStories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return ResponseEntity.ok(storyService.getPaginatedStories(pageable));
     }
 
     @GetMapping("/{id}")
