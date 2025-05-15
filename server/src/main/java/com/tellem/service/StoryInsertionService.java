@@ -1,10 +1,11 @@
-package com.tellem.service.benchmark;
+package com.tellem.service;
 
 import com.tellem.model.Frame;
 import com.tellem.model.Story;
 import com.tellem.repository.FrameRepository;
 import com.tellem.repository.StoryRepository;
-import com.tellem.service.CSVLoggerService;
+import com.tellem.service.benchmark.StoryBuilderInterface;
+import com.tellem.utils.TextGeneratorUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,17 +28,18 @@ public class StoryInsertionService implements StoryBuilderInterface {
     @Override
     public Story createStory(String title, String description, String image) {
         Story story = new Story();
-        story.setTitle(title);
-        story.setDescription(description);
-        story.setFeatureImage(image);
+        story.setDescription(TextGeneratorUtils.generateStoryDescription(story.getTitle()));
+        story.setFeatureImage("https://tell-em-bucket.s3.eu-central-1.amazonaws.com/artistic_landscape_view_of_mountains_trees_lights_purple_starry_sky_moon_minimalism_4k_hd_minimalism.jpg");
+       
         return storyRepository.save(story).block();
     }
 
     @Override
     public Frame createFrame(int index, Story story) {
         Frame frame = new Frame();
-        frame.setContent("This is a test node. Node " + index);
-        frame.setImage("image.png");
+        frame.setContent(TextGeneratorUtils.generateFrameContent(index));
+        frame.setImage("https://tell-em-bucket.s3.eu-central-1.amazonaws.com/artistic_mountains_moon_bird_trees_forest_purple_starry_sky_vaporwave_hd_vaporwave.jpg");
+
         return frameRepository.save(frame).block();
     }
 
@@ -49,7 +51,6 @@ public class StoryInsertionService implements StoryBuilderInterface {
             Frame frame = createFrame(i, story);
             long end = System.currentTimeMillis();
 
-            CSVLoggerService.log("POSTGRESQL", "insert_node", i, end - start);
             System.out.println("Inserted Node " + i + " in " + (end - start) + " ms");
 
             frames.add(frame);
@@ -63,7 +64,6 @@ public class StoryInsertionService implements StoryBuilderInterface {
             long start = System.currentTimeMillis();
             long end = System.currentTimeMillis();
 
-            CSVLoggerService.log("POSTGRESQL", "insert_decision", i, end - start);
             System.out.println("Inserted decision from frame " + i + " in " + (end - start) + " ms");
         }
     }

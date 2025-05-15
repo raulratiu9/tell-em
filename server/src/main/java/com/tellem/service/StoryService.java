@@ -19,6 +19,19 @@ public class StoryService {
         this.storyRepository = storyRepository;
     }
 
+    public Flux<Story> getPaginatedStories(int page, int size) {
+        return storyRepository.findAll().skip((long) page * size)
+                .take(size);
+    }
+
+    public Flux<Story> searchStories(String query, int page, int size) {
+        return storyRepository
+                .findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query)
+                .skip((long) page * size)
+                .take(size);
+    }
+
+
     public Story createGraphFromInput(StoryDto input) {
         if (input.getFrames() == null || input.getFrames().isEmpty()) {
             throw new IllegalArgumentException("Story must have at least one frame");

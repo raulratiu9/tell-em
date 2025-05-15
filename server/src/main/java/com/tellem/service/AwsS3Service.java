@@ -16,12 +16,12 @@ import java.io.InputStream;
 @Service
 public class AwsS3Service {
     private final AmazonS3 s3Client;
-    private final String accessKeyId = System.getenv("AWS_ACCESS_KEY_ID");
-    private final String secretAccessKey = System.getenv("AWS_SECRET_ACCESS_KEY");
     private final String bucketName = System.getenv("AWS_S3_BUCKET_NAME");
 
 
     public AwsS3Service() {
+        String accessKeyId = System.getenv("AWS_ACCESS_KEY_ID");
+        String secretAccessKey = System.getenv("AWS_SECRET_ACCESS_KEY");
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
         this.s3Client = AmazonS3ClientBuilder.standard()
                 .withRegion(Regions.EU_CENTRAL_1)

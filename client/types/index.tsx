@@ -4,10 +4,10 @@ export interface RootStackParamList {
 }
 
 export interface Story {
-  id: number;
+  storyId: string;
   title: string;
-  content: string;
-  image: string;
+  description: string;
+  featureImage: string;
 }
 
 export interface Frame {

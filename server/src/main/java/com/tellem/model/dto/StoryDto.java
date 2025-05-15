@@ -12,5 +12,5 @@ public class StoryDto {
     private String featureImage;
     private List<FrameDto> frames;
     private UUID firstFrameId;
-    
+
 }
