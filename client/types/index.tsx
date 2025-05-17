@@ -8,18 +8,19 @@ export interface Story {
   title: string;
   description: string;
   featureImage: string;
+  firstFrameId: number;
+  frames: Frame[];
 }
 
 export interface Frame {
-  id: number;
+  frameId: number;
   content: string;
   image: string;
-  storyId: number;
   choices: Choice[];
 }
 
 export interface Choice {
   id: number;
   name: string;
-  frameId: number;
+  nextFrameId: number;
 }

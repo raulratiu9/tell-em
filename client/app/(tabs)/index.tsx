@@ -126,7 +126,7 @@ export default function HomePage() {
       <FlatList
         contentContainerStyle={styles.container}
         data={storiesToRender}
-        keyExtractor={(item: Story) => item.id.toString()}
+        keyExtractor={(item: Story) => item?.id?.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => router.push(`/story/${item.id}`)}>
             <StoryCard story={item} />

@@ -1,167 +1,183 @@
-import DonationButton from '@/components/DonationButton';
-import ShareButton from '@/components/ShareButton';
-import { Story } from '@/types';
+import BackdropPhoto from '@/components/BackdropPhoto';
+import FramePhoto from '@/components/FramePhoto';
+import { Frame, Story } from '@/types';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import axios from 'axios';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useSearchParams } from 'expo-router/build/hooks';
-import { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
-import NotFoundScreen from '../+not-found';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 
-const StoryDetails = () => {
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+  runOnJS,
+} from 'react-native-reanimated';
+
+const { width } = Dimensions.get('window');
+const _imageWidth = width * 0.8;
+const _spacing = 12;
+
+export const navigationOptions = {
+  headerTransparent: true,
+  headerTitle: '',
+  headerBackTitleVisible: false,
+  headerTintColor: '#888',
+};
+
+export default function StoryDetails() {
   const searchParams = useSearchParams();
   const navigation = useNavigation();
   const id = searchParams.get('id');
 
-  const [story, setStory] = useState<Story>();
+  const [story, setStory] = useState<Story>({} as Story);
+  const [activeNodes, setActiveNodes] = useState<Frame[]>([]);
+  const [historyNodes, setHistoryNodes] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const scrollY = useRef(new Animated.Value(0)).current;
+  const flatListRef = useRef<Animated.FlatList<any>>(null);
+  const scrollX = useSharedValue(0);
+
+  const onHandleScroll = useAnimatedScrollHandler((event) => {
+    scrollX.value = event.contentOffset.x / (_imageWidth + _spacing);
+    runOnJS(setCurrentIndex)(Math.round(scrollX.value));
+  });
+
+  useLayoutEffect(() => {
+    if (id) {
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 }}
+          >
+            <MaterialIcons name="arrow-back-ios" size={24} color="#888" />
+          </TouchableOpacity>
+        ),
+        headerTransparent: true,
+        headerTitle: '',
+        headerBackTitleVisible: false,
+        headerTintColor: '#f4f4f4',
+      });
+    }
+  }, [navigation, id]);
 
   useEffect(() => {
     const fetchStory = async () => {
-      console.log('Fetching story with ID:', id);
       try {
-        const response = await axios.get(
+        const response = await axios.get<Story>(
           `${process.env.EXPO_PUBLIC_BASE_API_URL}api/stories/${id}`,
         );
-
         setStory(response.data);
       } catch (error) {
-        console.error(error as Error);
-        return <NotFoundScreen />;
+        console.error('Failed to fetch story', error);
+        setStory({} as Story);
       }
     };
 
-    if (id) {
-      fetchStory();
-      navigation.setOptions({
-        headerLeft: () => (
-          <View>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{ flexDirection: 'row', alignItems: 'center' }}
-            >
-              <MaterialIcons name="arrow-back-ios" size={24} color="black" />
-              <Text style={{ fontFamily: '', color: 'black' }}>Back</Text>
-            </TouchableOpacity>
-          </View>
-        ),
-      });
-    }
-  }, [id, navigation]);
+    if (id) fetchStory();
+  }, [id]);
 
-  if (!story) return <NotFoundScreen />;
+  useEffect(() => {
+    if (!story || !story.frames?.length) return;
 
-  const images = [
-    `${process.env.EXPO_PUBLIC_BASE_API_URL}${story.image}`,
-    `${process.env.EXPO_PUBLIC_BASE_API_URL}1736715174378_majkl-velner-nKY59_d9FlA-unsplash.jpg`,
-    `${process.env.EXPO_PUBLIC_BASE_API_URL}1736932901750_88EC2918-52C4-4BBF-AACA-B7AC9FEEEBD2.jpg`,
-  ];
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    {
-      useNativeDriver: false,
-      listener: (event: any) => {
-        const scrollPosition = event.nativeEvent.contentOffset.y;
-        const imageIndex = Math.min(
-          Math.floor(scrollPosition / story.content.length),
-          images.length - 1,
-        );
+    const visited = new Set<number>();
+    const active: Frame[] = [];
+    const findFrame = (id: number) => story.frames.find((f) => f.frameId === id);
 
-        if (imageIndex < 0) setCurrentImageIndex(0);
-        else setCurrentImageIndex(imageIndex);
-      },
-    },
-  );
+    const buildPath = (frameId: number) => {
+      if (visited.has(frameId)) return;
+      const frame = findFrame(frameId);
+      if (!frame) return;
+      visited.add(frameId);
+      active.push(frame);
+      const next = frame.choices?.[0]?.nextFrameId;
+      if (next != null) buildPath(next);
+    };
 
-  const fadeAnim = scrollY.interpolate({
-    inputRange: [0, 300, 600],
-    outputRange: [1, 0.3, 1],
-    extrapolate: 'clamp',
+    buildPath(story.firstFrameId ?? story.frames[0].frameId);
+    setActiveNodes(active);
+  }, [story]);
+
+  const onHandleDecision = (nextFrameId: number) => {
+    const nextFrame = story.frames.find((f) => f.frameId === nextFrameId);
+    if (!nextFrame) return;
+    setHistoryNodes((prev) => [...prev, String(nextFrameId)]);
+    setActiveNodes((prev) => [...prev, nextFrame]);
+    setCurrentIndex(activeNodes.length);
+  };
+
+  const goBack = () => {
+    if (historyNodes.length === 0) return;
+    const updatedHistory = historyNodes.slice(0, -1);
+    const updatedNodes = activeNodes.slice(0, -1);
+    setHistoryNodes(updatedHistory);
+    setActiveNodes(updatedNodes);
+  };
+
+  const getItemLayout = (_: unknown, index: number) => ({
+    length: _imageWidth + _spacing,
+    offset: (_imageWidth + _spacing) * index,
+    index,
   });
 
-  return (
-    <View style={styles.container}>
-      <Animated.ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContainer}
-        onScroll={handleScroll}
-        scrollEventThrottle={100}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.title}>{story.title}</Text>
-        <View style={styles.divider} />
-        <View style={{ alignItems: 'flex-start', flexDirection: 'row' }}>
-          <DonationButton storyId={story.id} />
-          <ShareButton storyId={story.id} />
-        </View>
-        <Text style={styles.content}>{story.content}</Text>
-      </Animated.ScrollView>
-
-      <View style={styles.imageContainer}>
-        <Animated.Image
-          source={{ uri: images[currentImageIndex] }}
-          style={[styles.image, { opacity: fadeAnim }]}
-        />
-        <LinearGradient
-          colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
-          style={styles.gradientOverlay}
-        />
+  if (!story) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Loading story...</Text>
       </View>
+    );
+  }
+
+  const backdropImages = activeNodes.map((node) => node.image);
+
+  const windowSize = 2;
+  const [visibleFrames, setVisibleFrames] = useState<Frame[]>([]);
+
+  useEffect(() => {
+    console.log('intra deacu');
+
+    const updated = activeNodes.filter(
+      (_, i) => Math.abs(i - currentIndex) <= windowSize,
+    );
+    console.log('updated', updated);
+    setVisibleFrames(updated);
+  }, [activeNodes, currentIndex]);
+
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={StyleSheet.absoluteFillObject}>
+        {backdropImages.map((photo, index) => (
+          <BackdropPhoto key={index} photo={photo} index={index} scrollX={scrollX} />
+        ))}
+      </View>
+
+      <Animated.FlatList
+        ref={flatListRef}
+        data={activeNodes}
+        keyExtractor={(item) => item.frameId.toString()}
+        horizontal
+        snapToInterval={_imageWidth + _spacing}
+        decelerationRate="fast"
+        contentContainerStyle={{
+          gap: _spacing,
+          paddingHorizontal: (width - _imageWidth) / 2,
+        }}
+        renderItem={({ item, index }) => (
+          <FramePhoto
+            key={item.frameId}
+            item={item}
+            index={index}
+            scrollX={scrollX}
+            onHandleDecision={onHandleDecision}
+            allFrames={story.frames}
+          />
+        )}
+        onScroll={onHandleScroll}
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
+        getItemLayout={getItemLayout}
+      />
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 32,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContainer: {
-    paddingBottom: 250,
-  },
-  title: {
-    fontSize: 42,
-    textAlign: 'left',
-    fontFamily: 'MontserratBold',
-  },
-  content: {
-    marginTop: 16,
-    fontSize: 16,
-    lineHeight: 28,
-    fontFamily: 'MontserratRegular',
-  },
-  imageContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 250,
-  },
-  gradientOverlay: {
-    position: 'absolute',
-    bottom: 250,
-    left: 0,
-    right: 0,
-    height: 80,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  divider: {
-    width: 96,
-    height: 8,
-    backgroundColor: 'black',
-  },
-});
-
-export default StoryDetails;
+}
