@@ -15,7 +15,7 @@ export default function LatestStoriesCarousel({ stories }: Props) {
         data={stories}
         horizontal
         showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item?.id?.toString()}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <TouchableOpacity

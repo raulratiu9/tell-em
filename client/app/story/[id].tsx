@@ -155,7 +155,7 @@ export default function StoryDetails() {
       <Animated.FlatList
         ref={flatListRef}
         data={activeNodes}
-        keyExtractor={(item) => item.frameId.toString()}
+        keyExtractor={(item) => item?.frameId?.toString()}
         horizontal
         snapToInterval={_imageWidth + _spacing}
         decelerationRate="fast"

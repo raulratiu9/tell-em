@@ -25,7 +25,7 @@ export default function FramePhoto({
   allFrames,
 }: any) {
   const altScrollX = useSharedValue(0);
-  console.log('index', index.toString());
+  console.log('index', index?.toString());
   const isNearCurrent =
     Math.abs(scrollX.value - index * (_imageWidth + _spacing)) < _imageWidth * 1.5;
   const inputRange = [
