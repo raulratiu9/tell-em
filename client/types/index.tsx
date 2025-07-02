@@ -8,21 +8,14 @@ export interface Story {
   title: string;
   description: string;
   featureImage: string;
-  firstFrameId: number;
-  frames: Frame[];
+  firstFrame: Frame;
 }
 
 export interface Frame {
   frameId: number;
   content: string;
   image: string;
-  choices: Choice[];
-}
-
-export interface Choice {
-  id: number;
-  name: string;
-  nextFrameId: number;
+  nextFrames: Frame[];
 }
 
 export interface InsertionStatistics {

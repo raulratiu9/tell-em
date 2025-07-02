@@ -1,5 +1,5 @@
-import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 
@@ -8,7 +8,6 @@ import StoryCard from '@/components/StoryCard';
 import LatestStoriesCarousel from '@/components/LatestStoriesCarousel';
 import { getStories } from '@/api/getStories';
 import { loadCachedStories, saveCachedStories } from '@/utils/loadCachedStories';
-import StoryFeedSkeleton from '@/components/StoryFeedSkeleton';
 import useDebounce from '@/hooks/useDebounce';
 import { getSearchedStories } from '@/api/getSearchedStories';
 import Search from '@/components/Search';
@@ -25,16 +24,20 @@ export default function HomePage() {
   const [hydrated, setHydrated] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 400);
+  const queryClient = new QueryClient();
 
-  useEffect(() => {
-    loadCachedStories()
-      .then((cached) => {
-        setLatestStories(cached.slice(0, 10));
-      })
-      .finally(() => {
-        setHydrated(true);
-      });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ['stories'] });
+      loadCachedStories()
+        .then((cached) => {
+          setLatestStories(cached.slice(0, 10));
+        })
+        .finally(() => {
+          setHydrated(true);
+        });
+    }, []),
+  );
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isRefetching, refetch } =
     useInfiniteQuery({
@@ -67,7 +70,7 @@ export default function HomePage() {
   const allStories = data?.pages.flat() ?? [];
   const showingSearchResults = debouncedSearch.length > 0;
   const storiesToRender = showingSearchResults
-    ? (searchData?.pages.flat() ?? [])
+    ? searchData?.pages.flat()
     : allStories.slice(10);
 
   useEffect(() => {
@@ -100,12 +103,12 @@ export default function HomePage() {
       );
     }
 
-    // return (
-    //   <View style={styles.emptyContainer}>
-    //     <Text style={styles.emptyTitle}>No stories available</Text>
-    //     <Text style={styles.emptySubtitle}>Be the first to share your adventure!</Text>
-    //   </View>
-    // );
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyTitle}>No stories available</Text>
+        <Text style={styles.emptySubtitle}>Be the first to share your adventure!</Text>
+      </View>
+    );
   };
 
   return (
@@ -120,18 +123,18 @@ export default function HomePage() {
             style={styles.ctaImage}
           />
         </TouchableOpacity>
-      </View> */}
+      </View>  TODO: Uncomment when CTA is ready */}
       <FlatList
         contentContainerStyle={styles.container}
         data={storiesToRender}
-        keyExtractor={(item: Story) => item.storyId}
+        keyExtractor={(item: Story) => item?.storyId}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => router.push(`/story/${item.storyId}`)}>
             <StoryCard story={item} />
           </TouchableOpacity>
         )}
         ListHeaderComponent={<Text style={styles.header}>Explore more stories</Text>}
-        ListFooterComponent={getListFooterComponent}
+        ListFooterComponent={isFetchingNextPage ? getListFooterComponent : null}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
         refreshing={showingSearchResults ? isRefetchingSearch : isRefetching}

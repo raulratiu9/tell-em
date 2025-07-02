@@ -19,8 +19,6 @@ public class Story {
     private String description;
     @Property("featureImage")
     private String featureImage;
-    @Relationship(type = "WRITTEN_BY", direction = Relationship.Direction.OUTGOING)
-    private User author;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

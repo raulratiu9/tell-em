@@ -13,7 +13,6 @@ export const insertLinearStories = async (
         cancelToken,
       },
     );
-    console.log('Inserted linear stories:', response.data);
     return response.data;
   } catch (error) {
     if (axios.isCancel(error)) {

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/stories")
@@ -41,12 +43,12 @@ public class StoryController {
     public Flux<Story> getPaginatedStories(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
-
+System.out.println(storyService.getPaginatedStories(page, size));
         return storyService.getPaginatedStories(page, size);
     }
 
-    @GetMapping("/{title}")
-    public Mono<Story> getStoryByTitle(@PathVariable String title) {
-        return storyService.getStoryByTitle(title);
+    @GetMapping("/{id}")
+    public Mono<Story> getStoryByTitle(@PathVariable UUID id) {
+        return storyService.getStoryById(id);
     }
 }

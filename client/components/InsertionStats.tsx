@@ -1,4 +1,4 @@
-import { InsertionStatistics } from '@/types';
+import { InsertionStatistics, Story } from '@/types';
 import { ScrollView, View, Text } from 'react-native';
 import { Card, Divider } from 'react-native-paper';
 
@@ -8,7 +8,11 @@ const formatMemory = (bytes: number) =>
 const formatTime = (ms: number) => `${(ms / 1000).toFixed(2)} sec`;
 const formatAvg = (ms: number) => `${ms.toFixed(2)} ms/item`;
 
-export default function InsertionStats({ data }: { data: InsertionStatistics }) {
+export default function InsertionStats({
+  data,
+}: {
+  data: Story[] | InsertionStatistics;
+}) {
   return (
     <ScrollView scrollToOverflowEnabled contentContainerStyle={{ padding: 16 }}>
       {Object.entries(data).map(([key, item]) => (

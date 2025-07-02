@@ -22,7 +22,7 @@ export default function App() {
 
   async function handleEffect() {
     const user = await getLocalUser();
-    console.log('user', user);
+
     if (!user) {
       if (response?.type === 'success') {
         setToken(response.authentication.accessToken);
@@ -30,7 +30,6 @@ export default function App() {
       }
     } else {
       setUserInfo(user);
-      console.log('loaded locally');
     }
   }
 

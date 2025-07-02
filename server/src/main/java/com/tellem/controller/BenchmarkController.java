@@ -1,7 +1,7 @@
 package com.tellem.controller;
 
 import com.tellem.benchmark.InsertBranchingStories;
-import com.tellem.benchmark.InsertLiniarStories;
+import com.tellem.benchmark.InsertLinearStories;
 import com.tellem.benchmark.TraverseStory;
 import com.tellem.model.dto.MultipleBenchmarkDto;
 import com.tellem.model.dto.TraversalBenchmarkDto;
@@ -14,21 +14,21 @@ import java.util.UUID;
 @RequestMapping("api/benchmark")
 public class BenchmarkController {
 
-    private final InsertLiniarStories insertLiniarStoriesService;
+    private final InsertLinearStories insertLinearStoriesService;
     private final InsertBranchingStories insertBranchingStories;
     private final TraverseStory traverseStory;
 
     public BenchmarkController(
-            InsertLiniarStories insertLiniarStoriesService, InsertBranchingStories insertBranchingStories, TraverseStory traverseStory) {
-        this.insertLiniarStoriesService = insertLiniarStoriesService;
+            InsertLinearStories insertLinearStoriesService, InsertBranchingStories insertBranchingStories, TraverseStory traverseStory) {
+        this.insertLinearStoriesService = insertLinearStoriesService;
         this.insertBranchingStories = insertBranchingStories;
         this.traverseStory = traverseStory;
     }
 
-    @GetMapping("/liniar-stories")
+    @GetMapping("/linear-stories")
     public ResponseEntity<MultipleBenchmarkDto> run(@RequestParam int numberOfStories,
                                                     @RequestParam int numberOfNodes) {
-        MultipleBenchmarkDto benchmarkResponse = insertLiniarStoriesService.generate(numberOfStories, numberOfNodes);
+        MultipleBenchmarkDto benchmarkResponse = insertLinearStoriesService.generate(numberOfStories, numberOfNodes);
 
         return ResponseEntity.ok(benchmarkResponse);
     }

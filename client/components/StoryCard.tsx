@@ -11,7 +11,6 @@ const MAX_CONTENT_CHARS_ALLOWED = 75;
 
 export default function StoryCard({ story, isPreview }: Props) {
   const { title, description, featureImage } = story;
-
   return (
     <View>
       <View style={styles.imageContainer}>

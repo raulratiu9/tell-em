@@ -1,17 +1,10 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import {
-  Button,
-  Text,
-  ActivityIndicator,
-  Snackbar,
-  HelperText,
-  Menu,
-} from 'react-native-paper';
+import { Button, Text, ActivityIndicator, Snackbar, Menu } from 'react-native-paper';
 import { Formik } from 'formik';
 import { insertLinearStories } from '@/api/insertLinearStories';
 import { insertBranchingStories } from '@/api/insertBranchingStories';
-import { InsertionStatistics } from '@/types';
+import { Story } from '@/types';
 import InsertionStats from '@/components/InsertionStats';
 import axios from 'axios';
 
@@ -48,10 +41,10 @@ const Dropdown = ({ label, value, setValue, options }: any) => {
 export default function InsertStories() {
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ visible: false, message: '', color: '' });
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<Story[] | null>(null);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
-  const timerRef = useRef<NodeJS.Timer | null>(null);
+  const timerRef = useRef(null as NodeJS.Timeout | null);
   const cancelSourceRef = useRef<ReturnType<typeof axios.CancelToken.source> | null>(
     null,
   );
@@ -112,7 +105,6 @@ export default function InsertStories() {
 
           try {
             if (values.type === 'linear') {
-              console.log('Inserting linear stories:', values);
               response = await insertLinearStories(
                 Number(values.storyCount),
                 Number(values.nodeCount),
@@ -134,7 +126,6 @@ export default function InsertStories() {
                 color: '#4e080c',
               });
             } else {
-              console.log('Inserted stories:', response);
               setSnackbar({
                 visible: true,
                 message: '✅ Stories inserted successfully!',
@@ -150,10 +141,10 @@ export default function InsertStories() {
             });
           } finally {
             if (timerRef.current) {
-              clearInterval(timerRef?.current);
+              clearInterval(timerRef.current);
             }
             setElapsedTime(0);
-            setData(response);
+            setData(response as Story[]);
             setLoading(false);
           }
         }}
@@ -228,7 +219,7 @@ export default function InsertStories() {
                   </Button>
                 </>
               )}
-              {!loading && data && <InsertionStats data={data as InsertionStatistics} />}
+              {!loading && data && <InsertionStats data={data} />}
             </View>
           </View>
         )}

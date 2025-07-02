@@ -1,21 +1,28 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Text, TouchableOpacity, View, Dimensions, StyleSheet } from 'react-native';
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  Dimensions,
+  StyleSheet,
+  Image,
+} from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedStyle,
-  useSharedValue,
+  Extrapolate,
   withRepeat,
   withSequence,
   withTiming,
+  useSharedValue,
   Easing,
-  Extrapolate,
 } from 'react-native-reanimated';
+import { Button } from 'react-native-paper';
 
 const { width } = Dimensions.get('screen');
 const _imageWidth = width * 0.8;
 const _imageHeight = _imageWidth * 2.3;
-const _spacing = 12;
 
 export default function FramePhoto({
   item,
@@ -23,145 +30,150 @@ export default function FramePhoto({
   scrollX,
   onHandleDecision,
   allFrames,
+  onRestartStory,
 }: any) {
-  const altScrollX = useSharedValue(0);
-  console.log('index', index?.toString());
-  const isNearCurrent =
-    Math.abs(scrollX.value - index * (_imageWidth + _spacing)) < _imageWidth * 1.5;
-  const inputRange = [
-    (index - 1) * (_imageWidth + _spacing),
-    index * (_imageWidth + _spacing),
-    (index + 1) * (_imageWidth + _spacing),
-  ];
-
   const stylez = useAnimatedStyle(() => {
+    const scale = interpolate(
+      scrollX.value,
+      [index - 1, index, index + 1],
+      [0.95, 1, 0.95],
+      Extrapolate.CLAMP,
+    );
+    const rotate = interpolate(
+      scrollX.value,
+      [index - 1, index, index + 1],
+      [-5, 0, 5],
+      Extrapolate.CLAMP,
+    );
+
     return {
-      transform: [
-        {
-          scale: interpolate(
-            scrollX.value,
-            [index - 1, index, index + 1],
-            [1.4, 1, 1.4],
-            Extrapolate.CLAMP,
-          ),
-        },
-        {
-          rotate: `${interpolate(scrollX.value, [index - 1, index, index + 1], [15, 0, -15], Extrapolate.CLAMP)}deg`,
-        },
-      ],
+      transform: [{ scale }, { rotate: `${rotate}deg` }],
     };
   });
 
-  return (
+  const renderChoices = () => {
+    if (!item?.nextFrames) return;
+    return item.nextFrames.map((edge: any, i: number) => {
+      const edgeNode = allFrames?.find(
+        (frame: any) =>
+          frame.frameId === edge.frameId ||
+          frame.frameId === edge.nextFrames?.[0]?.frameId,
+      );
+      const rotationAnim = useSharedValue(0);
+
+      if (!edgeNode) return null;
+      rotationAnim.value = withRepeat(
+        withSequence(
+          withTiming(-10, {
+            duration: 2000,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(10, {
+            duration: 2000,
+            easing: Easing.inOut(Easing.ease),
+          }),
+        ),
+        -1,
+        true,
+      );
+      const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ rotate: `${rotationAnim.value}deg` }],
+      }));
+      return (
+        <TouchableOpacity
+          key={edge.frameId + i}
+          onPress={() => onHandleDecision(edgeNode.frameId)}
+          style={{ marginBottom: 20 }}
+        >
+          <Animated.Image
+            source={{ uri: edgeNode.image }}
+            style={[styles.choiceImage, animatedStyle]}
+          />
+          <Text style={styles.choiceLabel}>{edge.content || edgeNode.content}</Text>
+        </TouchableOpacity>
+      );
+    });
+  };
+
+  const renderSingle = () => (
+    <Animated.View style={[styles.cardContainer, stylez]}>
+      <Animated.Image source={{ uri: item.image }} style={[styles.fullImage]} />
+      <LinearGradient
+        colors={['rgba(241, 241, 241, 0.329)', 'rgba(37,37,37,0.4)']}
+        style={styles.gradientOverlay}
+      />
+      <View style={styles.contentBox}>
+        <Text style={styles.title}>{item?.title}</Text>
+        <Text style={styles.description}>{item?.content}</Text>
+      </View>
+    </Animated.View>
+  );
+
+  const renderEnd = () => (
     <View
-      style={{
-        overflow: 'visible',
-        width: _imageWidth,
-        height: _imageHeight,
-        borderRadius: 16,
-      }}
+      style={[
+        styles.cardContainer,
+        { justifyContent: 'center', alignItems: 'center', backgroundColor: '#0007' },
+      ]}
     >
-      {item.choices.length > 1 && (
+      <Text style={styles.endText}>The End</Text>
+      <Button mode="contained" onPress={onRestartStory} icon="restart">
+        <Text style={{ color: 'white' }}>Start Over</Text>
+      </Button>
+    </View>
+  );
+
+  const isBranching = item.nextFrames.length > 1;
+  const isEnd = item.nextFrames.length === 0;
+
+  return (
+    <View style={styles.outerCard}>
+      {isBranching && (
         <MaterialIcons
           name="signpost"
           size={128}
           color="white"
-          style={{ position: 'absolute', zIndex: 1, left: 100, top: 320 }}
+          style={styles.branchIcon}
         />
       )}
-      {item.choices.length === 0 && <Text>The End. Thank you for reading.</Text>}
-      {item.choices.length > 1 ? (
-        item.choices.map((edge: any) => {
-          const rotationAnim = useSharedValue(0);
-
-          const edgeNode = allFrames?.find(
-            (frame: any) => frame.frameId === edge.nextFrameId,
-          );
-          if (!edgeNode) return null;
-          rotationAnim.value = withRepeat(
-            withSequence(
-              withTiming(-10, {
-                duration: 2000,
-                easing: Easing.inOut(Easing.ease),
-              }),
-              withTiming(10, {
-                duration: 2000,
-                easing: Easing.inOut(Easing.ease),
-              }),
-            ),
-            -1,
-            true,
-          );
-          const animatedStyle = useAnimatedStyle(() => ({
-            transform: [{ rotate: `${rotationAnim.value}deg` }],
-          }));
-          return (
-            <Animated.View key={edge.nextFrameId} style={[stylez]}>
-              <TouchableOpacity onPress={() => onHandleDecision(edge.nextFrameId)}>
-                <Animated.Image
-                  source={{ uri: edgeNode.image }}
-                  style={[
-                    {
-                      overflow: 'visible',
-                      width: _imageWidth,
-                      height: _imageHeight / 2,
-                      borderRadius: 16,
-                      overlayColor: 'rgba(0,0,0,0.9)',
-                      opacity: 0.3,
-                      transform: [{ rotate: '40deg' }],
-                    },
-                    animatedStyle,
-                  ]}
-                />
-                <Text
-                  style={{
-                    position: 'absolute',
-                    bottom: 150,
-                    left: 80,
-                    color: 'white',
-                    fontFamily: 'MontserratBold',
-                    fontSize: 24,
-                    fontWeight: 'bold',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {edge.label}
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
-          );
-        })
-      ) : (
-        <Animated.View
-          style={[
-            {
-              overflow: 'hidden',
-              width: _imageWidth,
-              height: _imageHeight,
-              borderRadius: 16,
-            },
-            stylez,
-          ]}
-        >
-          <Animated.Image
-            source={{ uri: item.image }}
-            style={[{ flex: 1, zIndex: -1 }]}
-          />
-          <LinearGradient
-            colors={['rgba(241, 241, 241, 0.329)', 'rgba(37,37,37,0.2)']}
-            style={styles.gradientOverlay}
-          />
-          <View style={styles.contentBox}>
-            <Text style={styles.title}>{item?.title}</Text>
-            <Text style={styles.description}>{item?.content}</Text>
-          </View>
-        </Animated.View>
-      )}
+      {isEnd ? renderEnd() : isBranching ? renderChoices() : renderSingle()}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  outerCard: {
+    overflow: 'visible',
+    width: _imageWidth,
+    height: _imageHeight,
+    borderRadius: 16,
+    top: '7%',
+  },
+  cardContainer: {
+    overflow: 'hidden',
+    width: _imageWidth,
+    height: _imageHeight,
+    borderRadius: 16,
+  },
+  fullImage: {
+    flex: 1,
+    zIndex: -1,
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '100%',
+  },
+  contentBox: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    padding: 30,
+    backgroundColor: 'rgba(37,37,37,0.5)',
+    width: '100%',
+  },
   title: {
     color: 'white',
     fontSize: 18,
@@ -171,26 +183,44 @@ const styles = StyleSheet.create({
   description: {
     color: 'white',
     fontSize: 14,
-    lineHeight: 26,
+    lineHeight: 24,
     fontWeight: '400',
     letterSpacing: 1.3,
-    marginTop: 0,
-    paddingTop: 0,
-    width: _imageWidth - 45,
+    marginTop: 4,
   },
-  contentBox: {
-    gap: 0,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    padding: 30,
-    backgroundColor: 'rgba(37,37,37,0.5)',
-  },
-  gradientOverlay: {
-    position: 'absolute',
+  choiceImage: {
+    width: _imageWidth,
+    height: _imageHeight / 2,
+    opacity: 0.9,
     top: 0,
-    left: 0,
-    right: 0,
-    height: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // simulare de blur
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  choiceLabel: {
+    position: 'absolute',
+    bottom: '35%',
+    textAlignVertical: 'center',
+    left: 15,
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.6)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  branchIcon: {
+    position: 'absolute',
+    zIndex: 1,
+    left: (_imageWidth - 128) / 2,
+    top: _imageHeight / 2 - 64,
+  },
+  endText: {
+    color: 'white',
+    fontSize: 68,
+    fontWeight: 'bold',
   },
 });

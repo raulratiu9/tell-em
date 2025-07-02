@@ -20,8 +20,10 @@ public class StoryService {
     }
 
     public Flux<Story> getPaginatedStories(int page, int size) {
-        return storyRepository.findAll().skip((long) page * size)
-                .take(size);
+        return storyRepository.findAll()
+                .skip((long) page * size)
+                .take(size)
+                .limitRequest(size);
     }
 
     public Flux<Story> searchStories(String query, int page, int size) {
@@ -76,7 +78,7 @@ public class StoryService {
             actualRoot = new Frame();
             actualRoot.setFrameId(UUID.randomUUID());
             actualRoot.setContent("Virtual Start Frame");
-            actualRoot.setImage("virtual.png");
+            actualRoot.setImage("https://tell-em-bucket.s3.eu-central-1.amazonaws.com/purple_retro_wave_artistic_palm_trees_synthwave_moon_minimalism_vaporwave_4k_hd_vaporwave-2560x1440.jpg");
             actualRoot.setNextFrames(new ArrayList<>());
 
             for (FrameDto rootDto : rootFrames) {
@@ -104,5 +106,9 @@ public class StoryService {
 
     public Mono<Story> getStoryByTitle(String title) {
         return storyRepository.findByTitle(title);
+    }
+
+    public Mono<Story> getStoryById(UUID id) {
+        return storyRepository.findById(id);
     }
 }
