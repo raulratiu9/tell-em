@@ -109,7 +109,15 @@ export default function StoryMap({ frames }: Props) {
             ...frame,
             choices: [
               ...frame.choices,
-              { id: Date.now(), name: 'New Choice', frameId: currentFrameId, decision1, decision2, file1, file2 }, // Ensure all required properties are included
+              {
+                id: Date.now(),
+                name: 'New Choice',
+                frameId: currentFrameId,
+                decision1,
+                decision2,
+                file1,
+                file2,
+              }, // Ensure all required properties are included
             ],
           }
         : frame,
@@ -123,7 +131,7 @@ export default function StoryMap({ frames }: Props) {
       <ScrollView style={styles.container}>
         <FlatList
           data={framesData}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item?.id?.toString()}
           horizontal
           renderItem={({ item, index }) => {
             const isSelected = currentFrameId === item.id;

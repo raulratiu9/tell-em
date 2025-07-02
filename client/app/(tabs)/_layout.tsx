@@ -32,6 +32,15 @@ export default function TabLayout() {
           tabBarLabel: 'Stories',
         }}
       />
+
+      <Tabs.Screen
+        name="insert-stories"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color }) => <TabBarIcon name="plus" color={color} />,
+          tabBarLabel: 'Insert Stories',
+        }}
+      />
     </Tabs>
   );
 }
