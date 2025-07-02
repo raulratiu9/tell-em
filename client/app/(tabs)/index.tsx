@@ -1,18 +1,18 @@
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import { router } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 
 import { Story } from '@/types';
 import StoryCard from '@/components/StoryCard';
 import LatestStoriesCarousel from '@/components/LatestStoriesCarousel';
 import { getStories } from '@/api/getStories';
 import { loadCachedStories, saveCachedStories } from '@/utils/loadCachedStories';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import StoryFeedSkeleton from '@/components/StoryFeedSkeleton';
 import useDebounce from '@/hooks/useDebounce';
 import { getSearchedStories } from '@/api/getSearchedStories';
 import Search from '@/components/Search';
+import { ActivityIndicator } from 'react-native-paper';
 
 const PAGE_SIZE = 20;
 
@@ -79,9 +79,7 @@ export default function HomePage() {
   }, [data]);
 
   const getListFooterComponent = () => {
-    if (showingSearchResults && loadingMoreSearch) return <StoryFeedSkeleton />;
-    if (!showingSearchResults && isFetchingNextPage) return <StoryFeedSkeleton />;
-    return null;
+    return <ActivityIndicator size="large" style={{ marginTop: 20 }} animating />;
   };
 
   const handleEndReached = () => {
@@ -102,19 +100,19 @@ export default function HomePage() {
       );
     }
 
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyTitle}>No stories available</Text>
-        <Text style={styles.emptySubtitle}>Be the first to share your adventure!</Text>
-      </View>
-    );
+    // return (
+    //   <View style={styles.emptyContainer}>
+    //     <Text style={styles.emptyTitle}>No stories available</Text>
+    //     <Text style={styles.emptySubtitle}>Be the first to share your adventure!</Text>
+    //   </View>
+    // );
   };
 
   return (
     <View style={{ flex: 1 }}>
       <LatestStoriesCarousel stories={latestStories} />
       <Search value={searchTerm} onChange={setSearchTerm} />
-      <Text style={styles.ctaTitle}>Tell 'em your story</Text>
+      {/* <Text style={styles.ctaTitle}>Tell 'em your story</Text>
       <View style={styles.ctaContainer}>
         <TouchableOpacity onPress={() => router.push('/add-story')}>
           <Image
@@ -122,11 +120,11 @@ export default function HomePage() {
             style={styles.ctaImage}
           />
         </TouchableOpacity>
-      </View>
+      </View> */}
       <FlatList
         contentContainerStyle={styles.container}
         data={storiesToRender}
-        keyExtractor={(item: Story) => item.id.toString()}
+        keyExtractor={(item: Story) => item?.id?.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => router.push(`/story/${item.id}`)}>
             <StoryCard story={item} />
