@@ -12,6 +12,8 @@ import { createAsyncStoragePersistor } from '@/utils/asyncStoragePersistor';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 
 export { ErrorBoundary } from 'expo-router';
+import { Provider as PaperProvider } from 'react-native-paper';
+
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
@@ -60,10 +62,12 @@ function RootLayoutNav() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <PaperProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         </Stack>
+        </PaperProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

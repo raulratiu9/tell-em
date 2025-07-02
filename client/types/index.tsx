@@ -24,3 +24,16 @@ export interface Choice {
   name: string;
   nextFrameId: number;
 }
+
+export interface InsertionStatistics {
+  storiesResponse: Statistics;
+  framesResponse: Statistics;
+  choicesResponse: Statistics;
+}
+
+export interface Statistics {
+  insertedItems: number;
+  totalTimeMillis: number;
+  averageTimePerItem: number;
+  memoryUsedBytes: number;
+}
